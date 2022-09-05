@@ -10,7 +10,7 @@ int State::create_camera(Camera::Args args)
 
     Camera& camera = cameras[index];
     camera.pos = { 0, 0 };
-    camera.zoom = 1;
+    camera.zoom = 20.0;
     camera.priority = 0;
     camera.valid = true;
     camera.agent = args.agent;
@@ -51,8 +51,13 @@ void State::update_cameras()
         if (!camera.valid) continue;
         if (camera.priority < max_priority) continue;
 
-        static constexpr double base_scaling = 0.001f;
-        window.view_matrix = glm::scale(glm::vec3(camera.zoom, base_scaling * camera.zoom * aspect_ratio, 1.0f / num_levels))
+        static constexpr float base_scaling = 0.001f;
+        static constexpr float num_levels = 10;
+        window.view_matrix =
+            glm::scale(glm::vec3(
+                base_scaling * camera.zoom,
+                base_scaling * camera.zoom * window.aspect_ratio,
+                1.0f / num_levels))
             * glm::translate(glm::vec3(-camera.pos.x, -camera.pos.y, 0));
 
         //  Get mouse pos on screen

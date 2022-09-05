@@ -18,6 +18,7 @@ add_executable(game
     src/component/clock.cpp
     src/component/game.cpp
     src/component/shape.cpp
+    src/component/shape_renderer.cpp
     src/component/window.cpp
 )
 
@@ -28,4 +29,4 @@ target_include_directories(game
 add_library(stb INTERFACE)
 target_include_directories(stb INTERFACE /opt/stb)
 
-target_link_libraries(game PRIVATE GL glfw GLEW assimp stb tinyxml)
+target_link_libraries(game PRIVATE GL GLU glfw GLEW assimp stb tinyxml)

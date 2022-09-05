@@ -9,6 +9,7 @@
 #include "component/shape.h"
 
 #include "component/window.h"
+#include "component/shape_renderer.h"
 #include "component/clock.h"
 #include "component/game.h"
 
@@ -72,18 +73,13 @@ struct State {
     ADD_LIST(Shape, shape, void)
 
     ADD_SINGLE(Window, window, void)
+    ADD_SINGLE(ShapeRenderer, shape_renderer, void)
     ADD_SINGLE(Clock, clock, void)
     ADD_SINGLE(Game, game, void)
 
     void init();
     void deinit();
     void update();
-
-    float dt;
-    float aspect_ratio;
-    const int num_levels = 10; // Arbitrary for now
-    glm::mat4 projection, view;
-    glm::vec2 mouse_pos; // Projected onto world
 };
 
 #undef ADD_LIST

@@ -14,6 +14,7 @@ struct Window: public Component {
     unsigned int height;
     bool fullscreen;
     glm::vec4 bg;
+    std::string shader_path;
 
     // Window objects
     GLFWwindow *window;

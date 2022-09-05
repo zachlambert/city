@@ -33,16 +33,16 @@ void State::update_agents()
         Agent& agent = agents[i];
         if (!agent.valid) continue;
 
-        agent.pos.x += 1 * dt;
-        agent.orient += 0.2 * dt;
+        agent.pos.x += 1 * clock.dt;
+        agent.orient += 0.2 * clock.dt;
         shapes[agent.body_shape].pos = agent.pos;
         shapes[agent.hand_shape_left].pos = agent.pos
-            + 0.5f * glm::vec2(cos(agent.orient + M_PI/2), sin(agent.orient + M_PI/2));
+            + 5.0f * glm::vec2(cos(agent.orient + M_PI/2), sin(agent.orient + M_PI/2));
         shapes[agent.hand_shape_right].pos = agent.pos
-            + 0.5f * glm::vec2(cos(agent.orient - M_PI/2), sin(agent.orient - M_PI/2));
+            + 5.0f * glm::vec2(cos(agent.orient - M_PI/2), sin(agent.orient - M_PI/2));
 
         if (agent.pos.x > 5) {
-            agents.remove(i);
+            remove_agent(i);
         }
     }
 }

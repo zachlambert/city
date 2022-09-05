@@ -5,7 +5,6 @@ void State::create_game()
 {
     assert(!game.valid);
 
-    create_clock();
     {
         game.player_agent = create_agent();
         {
@@ -26,8 +25,6 @@ void State::update_game()
 void State::remove_game()
 {
     assert(game.valid);
-
-    remove_clock();
 
     // TODO: Clear agents, cameras, etc?
 

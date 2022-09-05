@@ -7,6 +7,8 @@
 #include <vector>
 
 #include <GL/glew.h>
+#include <GL/glu.h>
+
 // SHADER LOADING FUNCTION
 
 bool load_file_into_string(const std::string &file_path, std::string& string)
@@ -81,7 +83,7 @@ unsigned int load_shader(const std::string &vs_path, const std::string &fs_path)
 
     // Check the program
     GLint result = GL_FALSE;
-    int info_log_length;
+    int info_log_length = 0;
 
     glGetProgramiv(program_id, GL_LINK_STATUS, &result);
     glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &info_log_length);

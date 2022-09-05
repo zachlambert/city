@@ -11,6 +11,7 @@ void State::create_window()
     window.height = 800;
     window.fullscreen = false;
     window.bg = { 0.6, 0.6, 0.6, 1 };
+    window.shader_path = "shaders/";
 
     window.aspect_ratio = (float)window.width / window.height;
 
@@ -69,6 +70,11 @@ void State::update_window()
     glfwSwapBuffers(window.window);
     glfwPollEvents();
 
+    // TODO: Read input
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(window.bg.x, window.bg.y, window.bg.z, window.bg.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
