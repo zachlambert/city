@@ -1,14 +1,15 @@
 #pragma once
 
-#include "component/component.h"
 #include <vector>
 #include <array>
 #include <glm/glm.hpp>
 
 
-struct CircleRenderer: public Component {
-    std::array<glm::vec2, 6> quad_vertices;
+class CircleRenderer {
+public:
+    bool init();
 
+private:
     struct Instance {
         glm::vec3 pos; // z = depth
         glm::vec4 color;
@@ -23,5 +24,6 @@ struct CircleRenderer: public Component {
     unsigned int program_id;
     unsigned int v_loc;
 
+    std::array<glm::vec2, 6> quad_vertices;
     std::vector<Instance> instances;
 };

@@ -1,9 +1,7 @@
 #pragma once
 
-#include "component/component.h"
 
-
-struct Clock: public Component {
+struct Clock {
     float dt;
     float prev_time;
     float current_time;
