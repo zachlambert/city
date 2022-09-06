@@ -17,8 +17,8 @@ add_executable(game
     src/component/camera.cpp
     src/component/clock.cpp
     src/component/game.cpp
-    src/component/shape.cpp
-    src/component/shape_renderer.cpp
+    src/component/circle.cpp
+    src/component/circle_renderer.cpp
     src/component/window.cpp
 )
 

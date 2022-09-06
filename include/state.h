@@ -6,10 +6,10 @@
 
 #include "component/agent.h"
 #include "component/camera.h"
-#include "component/shape.h"
+#include "component/circle.h"
 
 #include "component/window.h"
-#include "component/shape_renderer.h"
+#include "component/circle_renderer.h"
 #include "component/clock.h"
 #include "component/game.h"
 
@@ -55,11 +55,11 @@ private:
     std::vector<int> free;
 };
 
-#define ADD_LIST(Type, name, inputs)\
-ComponentList<Type> name##s;\
+#define ADD_LIST(Type, name, plural, inputs)\
+ComponentList<Type> plural;\
 int create_##name(inputs);\
 void remove_##name(int index);\
-void update_##name##s();
+void update_##plural();
 
 #define ADD_SINGLE(Type, name, inputs)\
 Type name;\
@@ -68,12 +68,14 @@ void remove_##name();\
 void update_##name();
 
 struct State {
-    ADD_LIST(Agent, agent, void)
-    ADD_LIST(Camera, camera, Camera::Args args)
-    ADD_LIST(Shape, shape, void)
+    ADD_LIST(Agent, agent, agents, Agent::Args)
+    ADD_LIST(Camera, camera, cameras, Camera::Args args)
+    ADD_LIST(Circle, circle, circles, Circle::Args)
+    ADD_LIST(Hand, hand, hands, Hand::Args)
+    ADD_LIST(RigidBody, rigid_body, rigid_bodies, RigidBody::Args)
 
     ADD_SINGLE(Window, window, void)
-    ADD_SINGLE(ShapeRenderer, shape_renderer, void)
+    ADD_SINGLE(CircleRenderer, circle_renderer, void)
     ADD_SINGLE(Clock, clock, void)
     ADD_SINGLE(Game, game, void)
 

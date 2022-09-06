@@ -6,10 +6,10 @@
 #include <glm/glm.hpp>
 
 
-struct ShapeRenderer: public Component {
+struct CircleRenderer: public Component {
     std::array<glm::vec2, 6> quad_vertices;
 
-    struct CircleInstance {
+    struct Instance {
         glm::vec3 pos; // z = depth
         glm::vec4 color;
         float radius;
@@ -23,5 +23,5 @@ struct ShapeRenderer: public Component {
     unsigned int program_id;
     unsigned int v_loc;
 
-    std::vector<CircleInstance> circle_instances;
+    std::vector<Instance> instances;
 };

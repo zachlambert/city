@@ -72,9 +72,8 @@ void State::update_window()
 
     // TODO: Read input
 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
     glClearColor(window.bg.x, window.bg.y, window.bg.z, window.bg.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }

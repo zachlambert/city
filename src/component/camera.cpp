@@ -10,7 +10,7 @@ int State::create_camera(Camera::Args args)
 
     Camera& camera = cameras[index];
     camera.pos = { 0, 0 };
-    camera.zoom = 20.0;
+    camera.zoom = 100.0;
     camera.priority = 0;
     camera.valid = true;
     camera.agent = args.agent;
@@ -36,7 +36,7 @@ void State::update_cameras()
         {
             const Agent& agent = agents[camera.agent];
             if (agent.valid) {
-                camera.pos = agent.pos;
+                camera.pos = { 0, 0 }; // pose_position(rigid_bodies[agent.body_rigid_body].pose);
             } else {
                 cameras.remove(i);
                 continue;
