@@ -10,15 +10,14 @@ int create_rigid_body(
     int index = rigid_bodies.create();
     RigidBody& rigid_body = rigid_bodies[index];
 
-    rigid_body.inv_mass_matrix = {
-        1.0 / args.mass, 0, 0,
-        0, 1.0 / args.mass, 0,
-        0, 0, 1.0 / args.moment_of_inertia
-    };
+    rigid_body.inertia.mass = args.mass;
+    rigid_body.inertia.inertia = args.inertia;
+    rigid_body.inv_inertia.mass = 1.0f / args.mass;
+    rigid_body.inv_inertia.inertia = glm::inverse(args.inertia);
 
     rigid_body.pose = args.initial_pose;
-    rigid_body.twist = glm::zero<glm::vec3>();
-    rigid_body.wrench = glm::zero<glm::vec3>();
+    rigid_body.twist = Spatial::zero();
+    rigid_body.wrench = Spatial::zero();
 
     return index;
 }

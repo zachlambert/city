@@ -117,8 +117,7 @@ void Window::tick()
     const float scale = game_state.camera.zoom / game_state.camera.nominal_view_size;
     window_state.view_matrix =
         glm::scale(glm::vec3(scale, scale * window_state.aspect_ratio, 1))
-        * glm::translate(glm::vec3(-game_state.camera.pose.pos().x, -game_state.camera.pose.pos().y, 0))
-        * glm::rotate(game_state.camera.pose.theta(), glm::vec3(0, 0, 1));
+        * game_state.camera.pose.inverse().to_mat4();
 
     {
         // Convert mouse pos to screen coords, ie: -1 -> 1
@@ -134,7 +133,7 @@ void Window::tick()
 
         // Project onto world
         glm::mat4 view_inverse =
-            glm::translate(glm::vec3(game_state.camera.pose.pos().x, game_state.camera.pose.pos().y, 0))
+            game_state.camera.pose.to_mat4()
             * glm::scale(glm::vec3(1.0f / scale, 1.0f / (scale * window_state.aspect_ratio), 1));
         window_state.mouse_pos_world = view_inverse * screen_coords;
     }

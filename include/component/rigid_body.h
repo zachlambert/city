@@ -8,13 +8,14 @@ struct RigidBody {
     struct Args {
         Pose initial_pose;
         float mass;
-        float moment_of_inertia;
+        glm::mat3 inertia;
     };
 
     Pose pose;
     Spatial twist;
     Spatial wrench;
-    glm::mat3 inv_mass_matrix;
+    SpatialInertia inertia;
+    SpatialInertia inv_inertia;
     bool valid;
 };
 typedef ComponentList<RigidBody> RigidBodyList;

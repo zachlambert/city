@@ -14,12 +14,12 @@ add_executable(game
     src/main.cpp
     src/asset/shader.cpp
     src/component/agent.cpp
-    src/component/circle.cpp
+    src/component/mesh.cpp
     src/component/rigid_body.cpp
     src/system/game.cpp
     src/system/window.cpp
     src/system/physics.cpp
-    src/system/circle_renderer.cpp
+    src/system/mesh_renderer.cpp
 )
 
 target_include_directories(game

@@ -12,47 +12,49 @@ int create_agent(
     int index = agents.create();
     Agent& agent = agents[index];
 
-    agent.follow_gain = glm::diagonal3x3(glm::vec3(
-        args.follow_gain_lin,
-        args.follow_gain_lin,
-        args.follow_gain_ang));
-    agent.twist_gain = glm::diagonal3x3(glm::vec3(
-        args.twist_gain_lin,
-        args.twist_gain_lin,
-        args.twist_gain_ang));
+    agent.twist_gain_lin = args.twist_gain_lin;
+    agent.twist_gain_ang = args.twist_gain_ang;
 
-    agent.twist_target = glm::zero<glm::vec3>();
+    agent.twist_target.lin = glm::zero<glm::vec3>();
+    agent.twist_target.ang = glm::zero<glm::vec3>();
 
-    float mass = args.density * (4.0 / 3) * M_PI * pow(args.size / 2, 3);
-    agent.rigid_body = create_rigid_body(
-        agents.rigid_bodies,
-        {
-            args.initial_pose,
-            mass,
-            mass * 0.4f * std::pow(args.size / 2, 2.0f)
-        }
-    );
+    {
+        RigidBody::Args rigid_body;
+        rigid_body.initial_pose = args.initial_pose;
+        rigid_body.mass = args.density * (4.0 / 3) * M_PI * pow(args.size / 2, 3);
+        rigid_body.inertia =
+            glm::identity<glm::mat3>()
+            * rigid_body.mass * 0.4f * std::pow(args.size / 2, 2.0f);
 
-    agent.circle = create_circle(
-        agents.circles,
-        {
-            args.color,
-            args.size / 2,
-            0
-        }
-    );
+        agent.rigid_body = create_rigid_body(
+            agents.rigid_bodies,
+            rigid_body
+        );
+    }
+
+    {
+        Mesh::Args mesh;
+        mesh.mesh_id = agents.mesh_renderer.get_mesh("agent_body");
+        mesh.scale = 1;
+
+        agent.circle = create_mesh(
+            agents.meshes,
+            mesh
+        );
+    }
 
     return index;
 }
 
 void destroy_agent(
     AgentList& agents,
+    MeshRenderer& mesh_renderer,
     int index)
 {
     const Agent& agent = agents[index];
 
     destroy_rigid_body(agents.rigid_bodies, agent.rigid_body);
-    destroy_circle(agents.circles, agent.circle);
+    destroy_mesh(agents.meshes, agent.circle);
 
     agents.remove(index);
 }

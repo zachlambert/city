@@ -4,24 +4,24 @@
 #include "maths/geometry.h"
 
 #include "component/rigid_body.h"
-#include "component/circle.h"
+#include "component/mesh.h"
+
+#include "system/mesh_renderer.h"
 
 
 struct Agent {
     struct Args {
-        Pose initial_pose = Pose(0, 0, 0);
-        float size = 0;
-        float density = 0;
-        glm::vec4 color = glm::vec4(0, 0, 0, 0);
-        float follow_gain_lin = 0;
-        float follow_gain_ang = 0;
-        float twist_gain_lin = 0;
-        float twist_gain_ang = 0;
+        Pose initial_pose;
+        float size;
+        float density;
+        glm::vec4 color;
+        float twist_gain_lin;
+        float twist_gain_ang;
     };
 
     Spatial twist_target;
-    glm::mat3 follow_gain;
-    glm::mat3 twist_gain;
+    float twist_gain_lin;
+    float twist_gain_ang;
 
     int rigid_body;
     int circle;
@@ -30,14 +30,17 @@ struct Agent {
 class AgentList: public ComponentList<Agent> {
 public:
     AgentList(
-        CircleList& circles,
-        RigidBodyList& rigid_bodies
+        MeshList& meshes,
+        RigidBodyList& rigid_bodies,
+        MeshRenderer& mesh_renderer
     ):
-        circles(circles),
-        rigid_bodies(rigid_bodies)
+        meshes(meshes),
+        rigid_bodies(rigid_bodies),
+        mesh_renderer(mesh_renderer)
     {}
-    CircleList& circles;
+    MeshList& meshes;
     RigidBodyList& rigid_bodies;
+    MeshRenderer& mesh_renderer;
 };
 
 int create_agent(
