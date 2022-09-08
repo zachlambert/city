@@ -3,19 +3,26 @@
 #include <vector>
 #include <array>
 #include <glm/glm.hpp>
+#include <string>
+
+#include "system/window.h"
+#include "component/circle.h"
 
 
 class CircleRenderer {
 public:
-    bool init();
+    struct Args {
+        std::string shader_path;
+    };
+    CircleRenderer(
+        const WindowState& window_state,
+        const ComponentList<Circle>& circles,
+        const Args& args);
+    void tick();
 
 private:
-    struct Instance {
-        glm::vec3 pos; // z = depth
-        glm::vec4 color;
-        float radius;
-        float edge_width;
-    };
+    const WindowState& window_state;
+    const CircleList& circles;
 
     unsigned int VAO;
     unsigned int quad_VBO;
@@ -25,5 +32,4 @@ private:
     unsigned int v_loc;
 
     std::array<glm::vec2, 6> quad_vertices;
-    std::vector<Instance> instances;
 };

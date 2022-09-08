@@ -45,8 +45,8 @@ inline Pose operator*(const Pose& lhs, const Pose& rhs)
 
 inline float clamp_angle(float angle)
 {
-    while (angle > M_PI) angle -= 2 * M_PI;
-    while (angle < -M_PI) angle += 2 * M_PI;
+    if (angle > M_PI) angle -= 2 * M_PI;
+    if (angle < -M_PI) angle += 2 * M_PI;
     return angle;
 }
 

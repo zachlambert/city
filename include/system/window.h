@@ -3,26 +3,33 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <vector>
 #include <string>
-#include "component/component.h"
+#include "state/window_state.h"
+#include "state/game_state.h"
 
 
-struct Window: public Component {
-    // Settings
-    std::string name;
-    unsigned int width;
-    unsigned int height;
-    bool fullscreen;
-    glm::vec4 bg;
-    std::string shader_path;
+class Window {
+public:
+    struct Args {
+        std::string name;
+        int width;
+        int height;
+        bool fullscreen;
+        glm::vec4 bg;
+        std::vector<int> keys;
+    };
+    Window(
+        WindowState& window_state,
+        const GameState& game_state,
+        const Args& args);
+    ~Window();
+    void tick();
 
-    // Window objects
+private:
+    WindowState& window_state;
+    const GameState& game_state;
+
     GLFWwindow *window;
-    float aspect_ratio;
-
-    // State
-    bool running;
-    glm::mat4 view_matrix;
-    glm::vec2 mouse_pos;
-    bool have_world_view;
+    glm::vec4 bg;
 };

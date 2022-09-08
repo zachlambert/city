@@ -12,14 +12,14 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_executable(game
     src/main.cpp
-    src/shader.cpp
+    src/asset/shader.cpp
     src/component/agent.cpp
-    src/component/camera.cpp
-    src/component/clock.cpp
-    src/component/game.cpp
     src/component/circle.cpp
-    src/component/circle_renderer.cpp
-    src/component/window.cpp
+    src/component/rigid_body.cpp
+    src/system/game.cpp
+    src/system/window.cpp
+    src/system/physics.cpp
+    src/system/circle_renderer.cpp
 )
 
 target_include_directories(game

@@ -1,11 +1,22 @@
 #pragma once
 
-#include "component/component.h"
+#include "state/game_state.h"
+#include "state/window_state.h"
+#include "component/agent.h"
+
 
 class Game {
 public:
-    bool init()
-};
-struct Game: public Component {
-    int player_agent;
+    struct Args {};
+    Game(
+        GameState& game_state,
+        const WindowState& window_state,
+        AgentList& agents,
+        const Args& args);
+    void tick();
+
+private:
+    GameState& game_state;
+    const WindowState& window_state;
+    AgentList& agents;
 };

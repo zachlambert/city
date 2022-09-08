@@ -15,6 +15,6 @@ void main()
 {
     vec2 scaled_pos = pos.xy + radius * vertex_pos_in;
     gl_Position = V * vec4(scaled_pos, 0.0, 1.0);
-    vertex_color = color;
+    vertex_color = vec4(color.xyz, color.w);
     vertex_pos = vertex_pos_in;
 }
