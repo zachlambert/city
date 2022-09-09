@@ -2,6 +2,8 @@
 #include "system/game.h"
 #include <glm/gtc/constants.hpp>
 #include <GLFW/glfw3.h>
+#include <iostream>
+#include <glm/gtx/string_cast.hpp>
 
 
 Game::Game(
@@ -20,23 +22,23 @@ Game::Game(
         std::vector<MeshVertex> vertices;
         std::vector<unsigned short> indices;
         vertices.push_back({
-            glm::vec3(-0.5, -0.5, 0),
-            glm::vec3(0, 0, 1),
+            glm::vec3(0, -0.5, 0),
+            glm::vec3(-1, 0, 0),
             glm::vec4(1, 0, 0, 1)
         });
         vertices.push_back({
-            glm::vec3(0.5, -0.5, 0),
-            glm::vec3(0, 0, 1),
+            glm::vec3(0, -0.5, 1),
+            glm::vec3(-1, 0, 0),
             glm::vec4(1, 0, 0, 1)
         });
         vertices.push_back({
-            glm::vec3(0.5, 0.5, 0),
-            glm::vec3(0, 0, 1),
+            glm::vec3(0, 0.5, 1),
+            glm::vec3(-1, 0, 0),
             glm::vec4(1, 0, 0, 1)
         });
         vertices.push_back({
-            glm::vec3(-0.5, 0.5, 0),
-            glm::vec3(0, 0, 1),
+            glm::vec3(0, 0.5, 0),
+            glm::vec3(-1, 0, 0),
             glm::vec4(1, 0, 0, 1)
         });
         indices.push_back(0);
@@ -45,6 +47,32 @@ Game::Game(
         indices.push_back(2);
         indices.push_back(3);
         indices.push_back(0);
+        vertices.push_back({
+            glm::vec3(1, -0.5, 1),
+            glm::vec3(0, 0, 1),
+            glm::vec4(1, 0, 0, 1)
+        });
+        vertices.push_back({
+            glm::vec3(0, -0.5, 1),
+            glm::vec3(0, 0, 1),
+            glm::vec4(1, 0, 0, 1)
+        });
+        vertices.push_back({
+            glm::vec3(0, 0.5, 1),
+            glm::vec3(0, 0, 1),
+            glm::vec4(1, 0, 0, 1)
+        });
+        vertices.push_back({
+            glm::vec3(1, 0.5, 1),
+            glm::vec3(0, 0, 1),
+            glm::vec4(1, 0, 0, 1)
+        });
+        indices.push_back(6);
+        indices.push_back(5);
+        indices.push_back(4);
+        indices.push_back(4);
+        indices.push_back(7);
+        indices.push_back(6);
         mesh_renderer.load_mesh("agent_body", vertices, indices);
     }
 
@@ -68,11 +96,12 @@ Game::Game(
     }
 #endif
 
-    game_state.camera.pose.pos = glm::vec3(-5, 0, 5);
+    game_state.camera.pose.pos = glm::vec3(-5, 0, 3);
+    float angle = 0.5;
     game_state.camera.pose.orient = glm::mat3(
-        glm::vec3(cos(M_PI/4), 0, -sin(M_PI/4)),
+        glm::vec3(cos(angle), 0, -sin(angle)),
         glm::vec3(0, 1, 0),
-        glm::vec3(cos(M_PI/4), 0, sin(M_PI/4))
+        glm::vec3(sin(angle), 0, cos(angle))
     );
     game_state.camera.zoom = 1;
     game_state.camera.nominal_view_size = 10;

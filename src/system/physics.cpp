@@ -1,5 +1,6 @@
 
 #include "system/physics.h"
+#include <iostream>
 
 
 Physics::Physics(
@@ -21,7 +22,8 @@ void Physics::tick()
             rigid_body.wrench
             + adjoint_map_momentum(
                 rigid_body.twist,
-                rigid_body.inertia * rigid_body.twist));
+                rigid_body.inertia * rigid_body.twist)
+        );
 
         float dt = game_state.dt;
         rigid_body.pose = rigid_body.pose * matrix_exp(dt * rigid_body.twist + 0.5 * pow(dt, 2) * acc);

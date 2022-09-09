@@ -14,7 +14,7 @@ struct Pose {
     {
         Pose result;
         result.orient = glm::transpose(orient);
-        result.pos = -orient * pos;
+        result.pos = -result.orient * pos;
         return result;
     }
     glm::mat4 to_mat4()const
@@ -120,7 +120,7 @@ inline Pose matrix_exp(const Spatial& twist)
     pose.pos = glm::zero<glm::vec3>();
 
     float angle = glm::length(twist.ang);
-    if (angle > 1e-12) {
+    if (angle < 1e-12) {
         pose.orient = glm::identity<glm::mat3>();
         return pose;
     }

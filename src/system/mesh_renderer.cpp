@@ -176,9 +176,6 @@ void MeshRenderer::tick()
         model =
             mesh.pose.to_mat4()
             * glm::scale(glm::vec3(mesh.scale, mesh.scale, mesh.scale));
-        
-        // TEMPORARY
-        model = glm::identity<glm::mat4>();
     }
 
     glBindVertexArray(VAO);

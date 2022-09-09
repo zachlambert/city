@@ -98,6 +98,15 @@ Window::Window(
     glfwSetKeyCallback(window, key_callback);
     glfwSetCharCallback(window, char_callback);
     glfwSetCursorPosCallback(window, cursor_pos_callback);
+
+    // x -> -z
+    // y -> -x
+    // z -> y
+    p_rot = glm::mat4(glm::mat3(
+        glm::vec3(0, 0, -1),
+        glm::vec3(-1, 0, 0),
+        glm::vec3(0, 1, 0)
+    ));
 }
 
 Window::~Window()
@@ -118,7 +127,7 @@ void Window::tick()
     const float scale = game_state.camera.zoom / game_state.camera.nominal_view_size;
     window_state.projection_matrix = glm::perspective(
         (float)M_PI/4, window_state.aspect_ratio, 0.01f, 100.0f
-    );
+    ) * p_rot;
 
     {
         // Convert mouse pos to screen coords, ie: -1 -> 1
@@ -142,6 +151,13 @@ void Window::tick()
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
+
+    glEnable(GL_DEPTH_TEST);
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+
     glClearColor(bg.x, bg.y, bg.z, bg.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
