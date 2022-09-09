@@ -42,7 +42,7 @@ private:
     std::vector<MeshData> datas;
 
     std::vector<MeshVertex> vertices;
-    std::vector<size_t> indices;
+    std::vector<unsigned short> indices;
     std::vector<Instance> instances;
 
     const WindowState& window_state;
@@ -54,5 +54,5 @@ private:
     unsigned int instance_VBO;
 
     unsigned int program_id;
-    unsigned int v_loc;
+    unsigned int pv_loc;
 };

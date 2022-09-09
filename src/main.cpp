@@ -7,6 +7,9 @@
 
 struct State {
     WindowState window_state;
+    GameState game_state;
+
+    Window window;
 
     MeshList meshes;
     MeshRenderer mesh_renderer;
@@ -15,10 +18,7 @@ struct State {
     AgentList agents;
 
     Game game;
-    Window window;
     Physics physics;
-
-    GameState game_state;
 
     State(
         const Game::Args& game_args,

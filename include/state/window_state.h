@@ -19,6 +19,7 @@ struct WindowState {
 
     bool view_active;
     glm::mat4 view_matrix;
+    glm::mat4 projection_matrix;
 
     bool running;
 };

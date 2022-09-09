@@ -114,10 +114,11 @@ void Window::tick()
     window_state.char_input = 0;
     glfwPollEvents();
 
+    window_state.view_matrix = game_state.camera.pose.inverse().to_mat4();
     const float scale = game_state.camera.zoom / game_state.camera.nominal_view_size;
-    window_state.view_matrix =
-        glm::scale(glm::vec3(scale, scale * window_state.aspect_ratio, 1))
-        * game_state.camera.pose.inverse().to_mat4();
+    window_state.projection_matrix = glm::perspective(
+        (float)M_PI/4, window_state.aspect_ratio, 0.01f, 100.0f
+    );
 
     {
         // Convert mouse pos to screen coords, ie: -1 -> 1

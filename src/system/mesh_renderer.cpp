@@ -18,7 +18,7 @@ MeshRenderer::MeshRenderer(
         args.shader_path + "mesh.fs"
     );
 
-    v_loc = glGetUniformLocation(program_id, "V");
+    pv_loc = glGetUniformLocation(program_id, "PV");
 
     // VAO
 
@@ -39,31 +39,34 @@ MeshRenderer::MeshRenderer(
         );
 
         glVertexAttribPointer(
-            0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3),
+            0, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex),
             (void*)offsetof(MeshVertex, pos)
         );
         glEnableVertexAttribArray(0);
 
         glVertexAttribPointer(
-            1, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3),
+            1, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex),
             (void*)offsetof(MeshVertex, normal)
         );
         glEnableVertexAttribArray(1);
 
         glVertexAttribPointer(
-            2, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec4),
-            (void*)offsetof(MeshVertex, normal)
+            2, 4, GL_FLOAT, GL_FALSE, sizeof(MeshVertex),
+            (void*)offsetof(MeshVertex, color)
         );
         glEnableVertexAttribArray(2);
     }
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Element buffer
     
     glGenBuffers(1, &vertex_EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertex_EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size(), &indices[0], GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        indices.size() * sizeof(unsigned short),
+        &indices[0],
+        GL_STATIC_DRAW
+    );
 
     //  Instance buffer
 
@@ -78,14 +81,16 @@ MeshRenderer::MeshRenderer(
             GL_STATIC_DRAW
         );
 
-        glVertexAttribPointer(
-            3, sizeof(glm::mat4)/sizeof(float), GL_FLOAT, GL_FALSE, sizeof(glm::mat4),
-            (void*)offsetof(Instance, model)
-        );
-        glEnableVertexAttribArray(3);
-        glVertexAttribDivisor(3, 1);
+        for (size_t i = 0; i < 4; i++) {
+            int index = 3 + i;
+            glVertexAttribPointer(
+                index, 4, GL_FLOAT, GL_FALSE, sizeof(Instance),
+                (void*)(offsetof(Instance, model) + i * sizeof(glm::vec4))
+            );
+            glEnableVertexAttribArray(index);
+            glVertexAttribDivisor(index, 1);
+        }
     }
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 int MeshRenderer::get_mesh(const std::string& name)
@@ -116,6 +121,8 @@ int MeshRenderer::load_mesh(
         indices[i] += vertices_start;
     }
 
+    glBindVertexArray(VAO);
+
     glBindBuffer(GL_ARRAY_BUFFER, vertex_VBO);
     glBufferData(
         GL_ARRAY_BUFFER,
@@ -123,13 +130,17 @@ int MeshRenderer::load_mesh(
         &vertices[0],
         GL_STATIC_DRAW
     );
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertex_EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size(), &indices[0], GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        indices.size() * sizeof(unsigned short),
+        &indices[0],
+        GL_STATIC_DRAW
+    );
 
     int id = datas.size();
+    datas.push_back(data);
     mesh_ids.emplace(name, id);
     return id;
 }
@@ -143,7 +154,7 @@ void MeshRenderer::tick()
 
     for (size_t i = 0; i < meshes.size(); i++) {
         const Mesh& mesh = meshes[i];
-        if (!mesh.valid) continue;
+        if (!mesh.valid || mesh.mesh_id == -1) continue;
         datas[mesh.mesh_id].instance_count++;
     }
 
@@ -156,7 +167,7 @@ void MeshRenderer::tick()
     instances.resize(instance_count);
     for (size_t i = 0; i < meshes.size(); i++) {
         const Mesh& mesh = meshes[i];
-        if (!mesh.valid) continue;
+        if (!mesh.valid || mesh.mesh_id == -1) continue;
 
         MeshData& data = datas[mesh.mesh_id];
         glm::mat4& model = instances[data.instance_next].model;
@@ -165,20 +176,25 @@ void MeshRenderer::tick()
         model =
             mesh.pose.to_mat4()
             * glm::scale(glm::vec3(mesh.scale, mesh.scale, mesh.scale));
+        
+        // TEMPORARY
+        model = glm::identity<glm::mat4>();
     }
 
+    glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, instance_VBO);
     glBufferData(
         GL_ARRAY_BUFFER,
         instances.size() * sizeof(Instance),
         &instances[0],
-        GL_STATIC_DRAW
+        GL_STREAM_DRAW
     );
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glm::mat4 pv_matrix = window_state.projection_matrix * window_state.view_matrix;
 
     glUseProgram(program_id);
     glBindVertexArray(VAO);
-    glUniformMatrix4fv(v_loc, 1, GL_FALSE, &window_state.view_matrix[0][0]);
+    glUniformMatrix4fv(pv_loc, 1, GL_FALSE, &pv_matrix[0][0]);
 
     for (auto& data: datas) {
         size_t instance_offset = data.instance_next - data.instance_count;
@@ -186,7 +202,7 @@ void MeshRenderer::tick()
             GL_TRIANGLES,
             data.index_count,
             GL_UNSIGNED_SHORT,
-            &indices[0],
+            0,
             data.instance_count,
             instance_offset
         );

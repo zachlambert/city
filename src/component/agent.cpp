@@ -37,7 +37,7 @@ int create_agent(
         mesh.mesh_id = agents.mesh_renderer.get_mesh("agent_body");
         mesh.scale = 1;
 
-        agent.circle = create_mesh(
+        agent.mesh = create_mesh(
             agents.meshes,
             mesh
         );
@@ -54,7 +54,7 @@ void destroy_agent(
     const Agent& agent = agents[index];
 
     destroy_rigid_body(agents.rigid_bodies, agent.rigid_body);
-    destroy_mesh(agents.meshes, agent.circle);
+    destroy_mesh(agents.meshes, agent.mesh);
 
     agents.remove(index);
 }
