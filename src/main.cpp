@@ -3,6 +3,7 @@
 #include "system/mesh_renderer.h"
 #include "system/physics.h"
 #include "system/window.h"
+#include <yaml-cpp/yaml.h>
 
 
 struct State {
@@ -36,20 +37,25 @@ struct State {
 
 int main()
 {
+    auto config = YAML::LoadFile("config.yaml");
+
     Game::Args game_args;
 
     Window::Args window_args;
-    window_args.width = 1200;
-    window_args.height = 800;
-    window_args.bg = glm::vec4(0.6, 0.6, 0.6, 1);
-    window_args.fullscreen = false;
-    window_args.name = "City";
-    window_args.keys = {
-        GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_S, GLFW_KEY_W,
-        GLFW_KEY_LEFT_SHIFT, GLFW_KEY_SPACE,
-        GLFW_KEY_Q, GLFW_KEY_E,
-        GLFW_KEY_1, GLFW_KEY_2
-    };
+    {
+        auto node = config["window"];
+        window_args.width = node["width"].as<size_t>();
+        window_args.height = node["height"].as<size_t>();
+        window_args.bg = glm::vec4(0.6, 0.6, 0.6, 1);
+        window_args.fullscreen = false;
+        window_args.name = "City";
+        window_args.keys = {
+            GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_S, GLFW_KEY_W,
+            GLFW_KEY_LEFT_SHIFT, GLFW_KEY_SPACE,
+            GLFW_KEY_Q, GLFW_KEY_E,
+            GLFW_KEY_1, GLFW_KEY_2
+        };
+    }
 
     Physics::Args physics_args;
 

@@ -7,8 +7,9 @@ project(
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
-
 set(CMAKE_CXX_STANDARD 20)
+
+find_package(yaml-cpp REQUIRED NO_MODULE)
 
 add_executable(game
     src/main.cpp
@@ -27,7 +28,4 @@ target_include_directories(game
     PRIVATE include
 )
 
-add_library(stb INTERFACE)
-target_include_directories(stb INTERFACE /opt/stb)
-
-target_link_libraries(game PRIVATE GL GLU glfw GLEW assimp stb tinyxml)
+target_link_libraries(game PRIVATE GL GLU glfw GLEW yaml-cpp)
