@@ -44,6 +44,12 @@ int main()
     window_args.bg = glm::vec4(0.6, 0.6, 0.6, 1);
     window_args.fullscreen = false;
     window_args.name = "City";
+    window_args.keys = {
+        GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_S, GLFW_KEY_W,
+        GLFW_KEY_LEFT_SHIFT, GLFW_KEY_SPACE,
+        GLFW_KEY_Q, GLFW_KEY_E,
+        GLFW_KEY_1, GLFW_KEY_2
+    };
 
     Physics::Args physics_args;
 

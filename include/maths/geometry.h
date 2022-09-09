@@ -145,3 +145,16 @@ inline float clamp_angle(float angle)
     if (angle > M_PI) angle -= 2 * M_PI;
     return angle;
 }
+
+// Transforms from X = Forward, Y = Left, Z = Up
+// to opengl frame, -Z = Forward, -X = Left, Y = Up
+// Need to use when calculating projection matrix, and to work with some
+// of the glm functions that use the opengl coordinate system
+static constexpr glm::mat3 coord_system_fix()
+{
+    return glm::mat3(
+        glm::vec3(0, 0, -1),
+        glm::vec3(-1, 0, 0),
+        glm::vec3(0, 1, 0)
+    );
+}

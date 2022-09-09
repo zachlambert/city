@@ -10,7 +10,14 @@ WindowState* g_window_state = nullptr;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if (!g_window_state) return;
-    g_window_state->key_states[key] = action;
+
+    if (action == GLFW_PRESS) {
+        g_window_state->key_states[key].just_changed = true;
+        g_window_state->key_states[key].down = true;
+    } else if (action == GLFW_RELEASE) {
+        g_window_state->key_states[key].just_changed = true;
+        g_window_state->key_states[key].down = false;
+    }
 }
 
 void char_callback(GLFWwindow* window, unsigned int codepoint)
@@ -88,7 +95,7 @@ Window::Window(
     window_state.mouse_pos_world = { 0, 0 };
     window_state.char_input = 0;
     for (const auto& key: args.keys) {
-        window_state.key_states.emplace(key, GLFW_KEY_UP);
+        window_state.key_states.emplace(key, KeyState());
     }
 
     window_state.view_active = true;
@@ -98,15 +105,6 @@ Window::Window(
     glfwSetKeyCallback(window, key_callback);
     glfwSetCharCallback(window, char_callback);
     glfwSetCursorPosCallback(window, cursor_pos_callback);
-
-    // x -> -z
-    // y -> -x
-    // z -> y
-    p_rot = glm::mat4(glm::mat3(
-        glm::vec3(0, 0, -1),
-        glm::vec3(-1, 0, 0),
-        glm::vec3(0, 1, 0)
-    ));
 }
 
 Window::~Window()
@@ -120,6 +118,11 @@ void Window::tick()
     window_state.running = !glfwWindowShouldClose(window);
     glfwSwapBuffers(window);
 
+    glfwSetInputMode(window, GLFW_CURSOR,
+        game_state.mouse_mode.cursor_hidden ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
+    glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, 
+        game_state.mouse_mode.raw_mouse_motion ? GLFW_TRUE : GLFW_FALSE);
+
     window_state.char_input = 0;
     glfwPollEvents();
 
@@ -127,7 +130,7 @@ void Window::tick()
     const float scale = game_state.camera.zoom / game_state.camera.nominal_view_size;
     window_state.projection_matrix = glm::perspective(
         (float)M_PI/4, window_state.aspect_ratio, 0.01f, 100.0f
-    ) * p_rot;
+    ) * glm::mat4(coord_system_fix());
 
     {
         // Convert mouse pos to screen coords, ie: -1 -> 1
@@ -148,6 +151,17 @@ void Window::tick()
         window_state.mouse_pos_world = view_inverse * screen_coords;
     }
 
+    if (window_state.mouse_active && game_state.mouse_mode.raw_mouse_motion) {
+        glm::vec2 centre = {
+            (float)window_state.screen_width / 2,
+            (float)window_state.screen_height / 2
+        };
+        glfwSetCursorPos(window, centre.x, centre.y);
+        window_state.mouse_delta = window_state.mouse_pos_screen - centre;
+        window_state.mouse_pos_screen = centre;
+    } else {
+        window_state.mouse_delta = { 0, 0 };
+    }
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);

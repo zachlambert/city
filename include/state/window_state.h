@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <unordered_map>
+#include "state/input_state.h"
 
 
 struct WindowState {
@@ -12,8 +13,10 @@ struct WindowState {
     bool mouse_active;
     glm::vec2 mouse_pos_screen;
     glm::vec2 mouse_pos_world;
+    glm::vec2 mouse_delta;
+
     unsigned int char_input; // 0 if no char received last poll
-    std::unordered_map<int, int> key_states;
+    std::unordered_map<int, KeyState> key_states;
     int mouse_left_action;
     int mouse_right_action;
 

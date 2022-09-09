@@ -32,5 +32,4 @@ private:
 
     GLFWwindow *window;
     glm::vec4 bg;
-    glm::mat4 p_rot; // required rotation before projection
 };
