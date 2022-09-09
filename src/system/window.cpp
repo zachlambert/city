@@ -36,10 +36,20 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     if (!g_window_state) return;
-    if (button == GLFW_MOUSE_BUTTON_RIGHT) {
-        g_window_state->mouse_right_action = action;
-    } else if (button == GLFW_MOUSE_BUTTON_LEFT) {
-        g_window_state->mouse_left_action = action;
+    KeyState* key_state = nullptr;
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        key_state = &g_window_state->mouse_left_state;
+    } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+        key_state = &g_window_state->mouse_right_state;
+    }
+    if (!key_state) return;
+
+    if (action == GLFW_PRESS) {
+        key_state->just_changed = true;
+        key_state->down = true;
+    } else if (action == GLFW_RELEASE) {
+        key_state->just_changed = true;
+        key_state->down = false;
     }
 }
 
@@ -105,6 +115,7 @@ Window::Window(
     glfwSetKeyCallback(window, key_callback);
     glfwSetCharCallback(window, char_callback);
     glfwSetCursorPosCallback(window, cursor_pos_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
 }
 
 Window::~Window()

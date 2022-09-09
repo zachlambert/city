@@ -24,7 +24,10 @@ struct Agent {
     float twist_gain_ang;
 
     int rigid_body;
-    int mesh;
+    struct {
+        int body;
+        int head;
+    } meshes;
     bool valid;
 };
 class AgentList: public ComponentList<Agent> {

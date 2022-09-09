@@ -2,11 +2,6 @@
 #include "system/game.h"
 #include <glm/gtc/constants.hpp>
 #include <GLFW/glfw3.h>
-#include <iostream>
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/string_cast.hpp>
-#include <glm/gtx/euler_angles.hpp>
-#include <iostream>
 
 
 Game::Game(
@@ -24,58 +19,12 @@ Game::Game(
     {
         std::vector<MeshVertex> vertices;
         std::vector<unsigned short> indices;
-        vertices.push_back({
-            glm::vec3(0, -0.5, 0),
-            glm::vec3(-1, 0, 0),
-            glm::vec4(1, 0, 0, 1)
-        });
-        vertices.push_back({
-            glm::vec3(0, -0.5, 1),
-            glm::vec3(-1, 0, 0),
-            glm::vec4(1, 0, 0, 1)
-        });
-        vertices.push_back({
-            glm::vec3(0, 0.5, 1),
-            glm::vec3(-1, 0, 0),
-            glm::vec4(1, 0, 0, 1)
-        });
-        vertices.push_back({
-            glm::vec3(0, 0.5, 0),
-            glm::vec3(-1, 0, 0),
-            glm::vec4(1, 0, 0, 1)
-        });
-        indices.push_back(0);
-        indices.push_back(1);
-        indices.push_back(2);
-        indices.push_back(2);
-        indices.push_back(3);
-        indices.push_back(0);
-        vertices.push_back({
-            glm::vec3(1, -0.5, 1),
-            glm::vec3(0, 0, 1),
-            glm::vec4(1, 0, 0, 1)
-        });
-        vertices.push_back({
-            glm::vec3(0, -0.5, 1),
-            glm::vec3(0, 0, 1),
-            glm::vec4(1, 0, 0, 1)
-        });
-        vertices.push_back({
-            glm::vec3(0, 0.5, 1),
-            glm::vec3(0, 0, 1),
-            glm::vec4(1, 0, 0, 1)
-        });
-        vertices.push_back({
-            glm::vec3(1, 0.5, 1),
-            glm::vec3(0, 0, 1),
-            glm::vec4(1, 0, 0, 1)
-        });
-        indices.push_back(6);
-        indices.push_back(5);
-        indices.push_back(4);
-        indices.push_back(4);
-        indices.push_back(7);
-        indices.push_back(6);
+        glm::vec4 color = glm::vec4(0, 0.5, 1, 1);
+
+        generate_box(vertices, indices, color, glm::vec3(0.4, 0.2, 0.5));
+        mesh_renderer.load_mesh("agent_head", vertices, indices);
+
+        generate_capsule(vertices, indices, color, 0.3, 1, 0.05);
         mesh_renderer.load_mesh("agent_body", vertices, indices);
     }
 
@@ -91,10 +40,13 @@ Game::Game(
     }
 
 #if 0
-    for (size_t i = 0; i < 200000; i++) {
+    for (size_t i = 0; i < 5000; i++) {
         Agent::Args agent = default_agent;
-        agent.initial_pose.pos.x = -5 + 10 * (float)rand() / (float)RAND_MAX;
-        agent.initial_pose.pos.y = -5 + 10 * (float)rand() / (float)RAND_MAX;
+        agent.initial_pose.pos.x = -20 + 40 * (float)rand() / (float)RAND_MAX;
+        agent.initial_pose.pos.y = -20 + 40 * (float)rand() / (float)RAND_MAX;
+        agent.initial_pose.orient = euler_to_rotation(glm::vec3(0, 0,
+            -M_PI + (float)rand() / (float)(2*M_PI)
+        ));
         create_agent(agents, agent);
     }
 #endif
@@ -103,6 +55,7 @@ Game::Game(
         CameraModeFirstPerson mode;
         mode.pos = glm::vec3(-5, 0, 3);
         mode.euler = glm::vec3(0, M_PI/4, 0);
+        mode.free = false;
         game_state.camera.mode = mode;
     }
     game_state.camera.zoom = 1;
@@ -156,8 +109,8 @@ void Game::tick()
         mode->pos += game_state.camera.pose.orient * vel * game_state.dt;
 
         glm::vec3 euler_dot = glm::zero<glm::vec3>();
-        euler_dot.z = -window_state.mouse_delta.x;
-        euler_dot.y = window_state.mouse_delta.y;
+        euler_dot.z = -1e-3 * window_state.mouse_delta.x / game_state.dt;
+        euler_dot.y = 1e-3 * window_state.mouse_delta.y / game_state.dt;
 
         mode->euler += euler_dot * game_state.dt;
         mode->euler.x = 0;
@@ -175,13 +128,22 @@ void Game::tick()
         game_state.camera.pose.orient = glm::orientate3(glm::vec3(
             -mode->euler.z, mode->euler.y, mode->euler.x
         ));
-        game_state.camera.pose.orient =
+        game_state.camera.pose.orient = euler_to_rotation(mode->euler);
             coord_system_fix()
             * game_state.camera.pose.orient
             * glm::transpose(coord_system_fix());
         
-        game_state.mouse_mode.raw_mouse_motion = true;
-        game_state.mouse_mode.cursor_hidden = true;
+        if (window_state.mouse_right_state.pressed()) {
+            mode->free = !mode->free;
+        }
+        
+        if (!mode->free) {
+            game_state.mouse_mode.raw_mouse_motion = true;
+            game_state.mouse_mode.cursor_hidden = true;
+        } else {
+            game_state.mouse_mode.raw_mouse_motion = false;
+            game_state.mouse_mode.cursor_hidden = false;
+        }
 
     } else if (auto mode = std::get_if<CameraModeTopDown>(&game_state.camera.mode)) {
 
@@ -222,7 +184,10 @@ void Game::tick()
         rigid_body.wrench.ang = agent.twist_gain_ang
             * (agent.twist_target.ang - rigid_body.twist.ang);
 
-        Mesh& mesh = agents.meshes[agent.mesh];
-        mesh.pose = rigid_body.pose;
+        agents.meshes[agent.meshes.body].pose = rigid_body.pose;
+        Pose pose;
+        agents.meshes[agent.meshes.head].pose = rigid_body.pose * Pose{
+            glm::vec3(0, 0, 1), glm::identity<glm::mat3>()
+        };
     }
 }

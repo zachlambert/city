@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_executable(game
     src/main.cpp
+    src/asset/mesh.cpp
     src/asset/shader.cpp
     src/component/agent.cpp
     src/component/mesh.cpp

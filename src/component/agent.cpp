@@ -32,16 +32,14 @@ int create_agent(
         );
     }
 
-    {
-        Mesh::Args mesh;
-        mesh.mesh_id = agents.mesh_renderer.get_mesh("agent_body");
-        mesh.scale = 1;
-
-        agent.mesh = create_mesh(
-            agents.meshes,
-            mesh
-        );
-    }
+    agent.meshes.head = create_mesh(
+        agents.meshes,
+        { 1, agents.mesh_renderer.get_mesh("agent_head") }
+    );
+    agent.meshes.body = create_mesh(
+        agents.meshes,
+        { 1, agents.mesh_renderer.get_mesh("agent_body") }
+    );
 
     return index;
 }
@@ -54,7 +52,8 @@ void destroy_agent(
     const Agent& agent = agents[index];
 
     destroy_rigid_body(agents.rigid_bodies, agent.rigid_body);
-    destroy_mesh(agents.meshes, agent.mesh);
+    destroy_mesh(agents.meshes, agent.meshes.head);
+    destroy_mesh(agents.meshes, agent.meshes.body);
 
     agents.remove(index);
 }

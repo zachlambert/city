@@ -4,6 +4,7 @@
 #include <glm/gtx/quaternion.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
+#include <glm/gtx/euler_angles.hpp>
 
 
 struct Pose {
@@ -157,4 +158,15 @@ static constexpr glm::mat3 coord_system_fix()
         glm::vec3(-1, 0, 0),
         glm::vec3(0, 1, 0)
     );
+}
+
+inline glm::mat3 euler_to_rotation(const glm::vec3& euler)
+{
+    glm::mat3 result;
+    result = glm::orientate3(glm::vec3(-euler.z, euler.y, euler.x));
+    result =
+        coord_system_fix()
+        * result
+        * glm::transpose(coord_system_fix());
+    return result;
 }

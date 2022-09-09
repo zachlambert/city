@@ -12,6 +12,7 @@ struct CameraModeTopDown {
 struct CameraModeFirstPerson {
     glm::vec3 pos;
     glm::vec3 euler;
+    bool free;
 };
 
 typedef std::variant<

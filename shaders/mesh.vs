@@ -14,5 +14,5 @@ void main()
 {
     color_vertex = color;
     gl_Position = PV * M * vec4(pos_modelspace, 1);
-    normal_worldspace = (M * vec4(normal_modelspace, 1)).xyz;
+    normal_worldspace = (M * vec4(normal_modelspace, 0)).xyz;
 }

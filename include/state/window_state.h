@@ -17,8 +17,8 @@ struct WindowState {
 
     unsigned int char_input; // 0 if no char received last poll
     std::unordered_map<int, KeyState> key_states;
-    int mouse_left_action;
-    int mouse_right_action;
+    KeyState mouse_left_state;
+    KeyState mouse_right_state;
 
     bool view_active;
     glm::mat4 view_matrix;
