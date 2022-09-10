@@ -70,7 +70,8 @@ int main()
 
     {
         Builder builder(world, terrain_renderer);
-        builder.build();
+        builder.start();
+        builder.finish();
     }
 
     while (viewport.open) {

@@ -7,27 +7,22 @@
 
 
 struct Region {
+    int connection_start;
+    int num_neighbours;
     int num_children;
     // Connections are guaranteed to be right after the region element
+    // [ <region> <neighbour connections> <children connections> ]
     bool visible;
-};
-
-struct RegionConnection {
-    int child; // -> Region
-};
-
-struct WorldGraph {
-    typedef std::variant<
-        Region,
-        RegionConnection
-    > Element;
-    std::vector<Element> elements;
+    // If physical false, this region doesn't have any associated terrain,
+    // but serves as a grouping of smaller regions that are all inside it
+    bool physical;
 };
 
 enum class RegionType {
-    GROUP, // No geometry,
+    OUTSIDE,
     OUTSIDE_ROAD,
     OUTSIDE_JUNCTION,
+    INSIDE,
     INSIDE_ROOM
 };
 
@@ -42,6 +37,7 @@ struct RegionMetadata {
 };
 
 struct World {
-    WorldGraph graph;
+    std::vector<Region> regions;
+    std::vector<int> connections;
     std::unordered_map<int, RegionMetadata> region_metadatas;
 };
