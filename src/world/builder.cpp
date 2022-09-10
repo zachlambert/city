@@ -24,6 +24,7 @@ void Builder::finish(World& world, TerrainRenderer& terrain_renderer)
     std::stack<StackState> stack;
     stack.emplace(0, 0, 0);
     world.regions.emplace_back();
+    world.region_metadatas.emplace_back();
 
     while (!stack.empty()) {
         StackState& state = stack.top();
@@ -50,7 +51,6 @@ void Builder::finish(World& world, TerrainRenderer& terrain_renderer)
                 terrain_renderer.set_region(state.region);
                 vertices.clear();
                 indices.clear();
-                // TODO: Change the mesh generation functions to not clear
                 node.region_builder->generate_mesh(vertices, indices);
                 terrain_renderer.load_mesh(vertices, indices);
             }
@@ -63,8 +63,12 @@ void Builder::finish(World& world, TerrainRenderer& terrain_renderer)
             state.child++;
             stack.emplace(StackState(next_node, world.regions.size(), node.children.size() - 1));
             world.regions.emplace_back();
+            world.region_metadatas.emplace_back();
 
         } else {
+
+            node.region_builder->set_metadata(world.region_metadatas[state.region]);
+
             int conn_start = world.regions[state.region].connection_start;
             for (int i = 0; i < node.children.size(); i++) {
                 int i_region = nodes.at(node.children[i]).region;
@@ -131,6 +135,13 @@ void CityBuilder::create_children()
         size.y/2 - outer_padding - road_width);
 }
 
+void CityBuilder::set_metadata(
+    RegionMetadata& metadata)
+{
+    metadata.centre = glm::vec3(centre.x, centre.y, 0);
+    metadata.type = RegionType::OUTSIDE;
+}
+
 void CityBuilder::generate_mesh(
     std::vector<MeshVertex>& vertices,
     std::vector<unsigned short>& indices)
@@ -145,6 +156,26 @@ RoadBuilder::RoadBuilder(Builder& builder, int node):
     color(0, 0, 0, 1)
 {
 
+}
+
+void RoadBuilder::set_metadata(
+    RegionMetadata& metadata)
+{
+    metadata.centre.x = 0.5f * (lower.x + upper.x);
+    metadata.centre.y = 0.5f * (lower.y + upper.y);
+
+    // TODO: Store road line and width, instead of a and b
+    // Also put junctions at the corners instead
+
+    RegionMetadata::Interface top;
+    top.a = glm::vec3(lower.x, upper.y, 0);
+    top.b = glm::vec3(upper.x, upper.y, 0);
+    metadata.interfaces.push_back(top);
+
+    RegionMetadata::Interface bot;
+    bot.a = glm::vec3(lower.x, lower.y, 0);
+    bot.b = glm::vec3(upper.x, lower.y, 0);
+    metadata.interfaces.push_back(bot);
 }
 
 void RoadBuilder::generate_mesh(

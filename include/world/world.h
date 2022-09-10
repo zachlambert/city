@@ -39,5 +39,5 @@ struct RegionMetadata {
 struct World {
     std::vector<Region> regions;
     std::vector<int> connections;
-    std::unordered_map<int, RegionMetadata> region_metadatas;
+    std::vector<RegionMetadata> region_metadatas;
 };

@@ -25,6 +25,8 @@ public:
         node(node)
     {}
 
+    virtual void set_metadata(
+        RegionMetadata& metadata) = 0;
     virtual void generate_mesh(
         std::vector<MeshVertex>& vertices,
         std::vector<unsigned short>& indices) = 0;
@@ -80,6 +82,8 @@ public:
     glm::vec4 color;
 
 private:
+    virtual void set_metadata(
+        RegionMetadata& metadata)override;
     void generate_mesh(
         std::vector<MeshVertex>& vertices,
         std::vector<unsigned short>& indices)override;
@@ -101,6 +105,8 @@ public:
     void create_children();
 
 private:
+    virtual void set_metadata(
+        RegionMetadata& metadata)override;
     void generate_mesh(
         std::vector<MeshVertex>& vertices,
         std::vector<unsigned short>& indices)override;
