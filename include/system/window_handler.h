@@ -5,11 +5,12 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <string>
-#include "state/window_state.h"
-#include "state/game_state.h"
+#include "state/viewport.h"
+#include "state/input.h"
+#include "state/camera.h"
 
 
-class Window {
+class WindowHandler {
 public:
     struct Args {
         std::string name;
@@ -19,16 +20,18 @@ public:
         glm::vec4 bg;
         std::vector<int> keys;
     };
-    Window(
-        WindowState& window_state,
-        const GameState& game_state,
+    WindowHandler(
+        Viewport& viewport,
+        Input& input,
+        const Camera& camera,
         const Args& args);
-    ~Window();
+    ~WindowHandler();
     void tick();
 
 private:
-    WindowState& window_state;
-    const GameState& game_state;
+    Viewport& viewport;
+    Input& input;
+    const Camera& camera;
 
     GLFWwindow *window;
     glm::vec4 bg;

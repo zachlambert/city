@@ -1,19 +1,19 @@
 
 #pragma once
 
-#include "system/game.h"
+#include "state/clock.h"
 #include "component/rigid_body.h"
 
 class Physics {
 public:
     struct Args {};
     Physics(
-        const GameState& game_state,
+        const Clock& clock,
         RigidBodyList& rigid_bodies,
         const Args& args);
     void tick();
 
 private:
-    const GameState& game_state;
+    const Clock& clock;
     RigidBodyList& rigid_bodies;
 };

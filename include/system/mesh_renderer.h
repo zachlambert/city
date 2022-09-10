@@ -4,8 +4,9 @@
 #include <array>
 #include <glm/glm.hpp>
 #include <string>
+#include <unordered_map>
 
-#include "system/window.h"
+#include "state/viewport.h"
 #include "component/mesh.h"
 #include "asset/mesh.h"
 
@@ -16,7 +17,7 @@ public:
         std::string shader_path;
     };
     MeshRenderer(
-        const WindowState& window_state,
+        const Viewport& viewport,
         const ComponentList<Mesh>& meshes,
         const Args& args);
     void tick();
@@ -45,7 +46,7 @@ private:
     std::vector<unsigned short> indices;
     std::vector<Instance> instances;
 
-    const WindowState& window_state;
+    const Viewport& viewport;
     const MeshList& meshes;
 
     unsigned int VAO;

@@ -6,11 +6,11 @@
 
 
 MeshRenderer::MeshRenderer(
-    const WindowState& window_state,
+    const Viewport& viewport,
     const MeshList& meshes,
     const Args& args
 ):
-    window_state(window_state),
+    viewport(viewport),
     meshes(meshes)
 {
     program_id = load_shader(
@@ -187,7 +187,7 @@ void MeshRenderer::tick()
         GL_STREAM_DRAW
     );
 
-    glm::mat4 pv_matrix = window_state.projection_matrix * window_state.view_matrix;
+    glm::mat4 pv_matrix = viewport.projection_matrix * viewport.view_matrix;
 
     glUseProgram(program_id);
     glBindVertexArray(VAO);

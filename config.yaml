@@ -1,3 +1,4 @@
+shader_path: "shaders/"
 window:
   name: "City"
   width: 1200

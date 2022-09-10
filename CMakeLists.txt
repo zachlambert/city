@@ -12,16 +12,18 @@ set(CMAKE_CXX_STANDARD 20)
 find_package(yaml-cpp REQUIRED NO_MODULE)
 
 add_executable(game
-    src/main.cpp
     src/asset/mesh.cpp
     src/asset/shader.cpp
     src/component/agent.cpp
     src/component/mesh.cpp
     src/component/rigid_body.cpp
-    src/system/game.cpp
-    src/system/window.cpp
-    src/system/physics.cpp
+    src/system/agent_handler.cpp
+    src/system/camera_handler.cpp
+    src/system/clock_handler.cpp
     src/system/mesh_renderer.cpp
+    src/system/physics.cpp
+    src/system/window_handler.cpp
+    src/main.cpp
 )
 
 target_include_directories(game

@@ -4,11 +4,11 @@
 
 
 Physics::Physics(
-    const GameState& game_state,
+    const Clock& clock,
     ComponentList<RigidBody>& rigid_bodies,
     const Args& args
 ):
-    game_state(game_state),
+    clock(clock),
     rigid_bodies(rigid_bodies)
 {}
 
@@ -25,8 +25,8 @@ void Physics::tick()
                 rigid_body.inertia * rigid_body.twist)
         );
 
-        float dt = game_state.dt;
-        rigid_body.pose = rigid_body.pose * matrix_exp(dt * rigid_body.twist + 0.5 * pow(dt, 2) * acc);
-        rigid_body.twist += acc * dt;
+        rigid_body.pose = rigid_body.pose
+            * matrix_exp(clock.dt * rigid_body.twist + 0.5 * pow(clock.dt, 2) * acc);
+        rigid_body.twist += acc * clock.dt;
     }
 }

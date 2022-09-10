@@ -32,14 +32,8 @@ int create_agent(
         );
     }
 
-    agent.meshes.head = create_mesh(
-        agents.meshes,
-        { 1, agents.mesh_renderer.get_mesh("agent_head") }
-    );
-    agent.meshes.body = create_mesh(
-        agents.meshes,
-        { 1, agents.mesh_renderer.get_mesh("agent_body") }
-    );
+    agent.meshes.head = create_mesh(agents.meshes, { 1, args.meshes.head });
+    agent.meshes.body = create_mesh(agents.meshes, { 1, args.meshes.body });
 
     return index;
 }

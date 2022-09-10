@@ -1,46 +1,46 @@
 
-#include "system/window.h"
+#include "system/window_handler.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
 #include <iostream>
 
 
-WindowState* g_window_state = nullptr;
+Input* g_input = nullptr;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if (!g_window_state) return;
+    if (!g_input) return;
 
     if (action == GLFW_PRESS) {
-        g_window_state->key_states[key].just_changed = true;
-        g_window_state->key_states[key].down = true;
+        g_input->key_states[key].just_changed = true;
+        g_input->key_states[key].down = true;
     } else if (action == GLFW_RELEASE) {
-        g_window_state->key_states[key].just_changed = true;
-        g_window_state->key_states[key].down = false;
+        g_input->key_states[key].just_changed = true;
+        g_input->key_states[key].down = false;
     }
 }
 
 void char_callback(GLFWwindow* window, unsigned int codepoint)
 {
-    if (!g_window_state) return;
-    g_window_state->char_input = codepoint;
+    if (!g_input) return;
+    g_input->char_input = codepoint;
 }
 
 void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 {
-    if (!g_window_state) return;
-    g_window_state->mouse_pos_screen = { xpos, ypos };
-    g_window_state->mouse_active = true;
+    if (!g_input) return;
+    g_input->mouse_pos_screen = { xpos, ypos };
+    g_input->mouse_active = true;
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-    if (!g_window_state) return;
+    if (!g_input) return;
     KeyState* key_state = nullptr;
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
-        key_state = &g_window_state->mouse_left_state;
+        key_state = &g_input->mouse_left_state;
     } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
-        key_state = &g_window_state->mouse_right_state;
+        key_state = &g_input->mouse_right_state;
     }
     if (!key_state) return;
 
@@ -53,13 +53,16 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     }
 }
 
-Window::Window(
-    WindowState& window_state,
-    const GameState& game_state,
+WindowHandler::WindowHandler(
+    Viewport& viewport,
+    Input& input,
+    const Camera& camera,
     const Args& args
 ):
-    window_state(window_state),
-    game_state(game_state),
+    viewport(viewport),
+    input(input),
+    camera(camera),
+    window(nullptr),
     bg(args.bg)
 {
     glewExperimental = true; // Needed for core profile
@@ -96,82 +99,82 @@ Window::Window(
     // Disable vsync
     // glfwSwapInterval(0);
 
-    window_state.screen_width = args.width;
-    window_state.screen_height = args.height;
-    window_state.aspect_ratio = (float)args.width / args.height;
+    viewport.screen_width = args.width;
+    viewport.screen_height = args.height;
+    viewport.aspect_ratio = (float)args.width / args.height;
 
-    window_state.mouse_active = false;
-    window_state.mouse_pos_screen = { 0, 0 };
-    window_state.mouse_pos_world = { 0, 0 };
-    window_state.char_input = 0;
+    input.mouse_active = false;
+    input.mouse_pos_screen = { 0, 0 };
+    input.mouse_pos_world = { 0, 0 };
+    input.char_input = 0;
     for (const auto& key: args.keys) {
-        window_state.key_states.emplace(key, KeyState());
+        input.key_states.emplace(key, KeyState());
     }
 
-    window_state.view_active = true;
-    window_state.running = true;
+    viewport.view_active = true;
+    viewport.open = true;
 
-    g_window_state = &window_state;
+    g_input = &input;
     glfwSetKeyCallback(window, key_callback);
     glfwSetCharCallback(window, char_callback);
     glfwSetCursorPosCallback(window, cursor_pos_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
 }
 
-Window::~Window()
+WindowHandler::~WindowHandler()
 {
-    g_window_state = nullptr;
+    g_input = nullptr;
     glfwTerminate();
 }
 
-void Window::tick()
+void WindowHandler::tick()
 {
-    window_state.running = !glfwWindowShouldClose(window);
+    viewport.open = !glfwWindowShouldClose(window);
     glfwSwapBuffers(window);
 
     glfwSetInputMode(window, GLFW_CURSOR,
-        game_state.mouse_mode.cursor_hidden ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
+        camera.cursor_mode.cursor_hidden ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
     glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, 
-        game_state.mouse_mode.raw_mouse_motion ? GLFW_TRUE : GLFW_FALSE);
+        camera.cursor_mode.raw_mouse_motion ? GLFW_TRUE : GLFW_FALSE);
 
-    window_state.char_input = 0;
+    input.char_input = 0;
     glfwPollEvents();
 
-    window_state.view_matrix = game_state.camera.pose.inverse().to_mat4();
-    const float scale = game_state.camera.zoom / game_state.camera.nominal_view_size;
-    window_state.projection_matrix = glm::perspective(
-        (float)M_PI/4, window_state.aspect_ratio, 0.01f, 100.0f
+    viewport.view_matrix = camera.pose.inverse().to_mat4();
+    const float scale = camera.zoom / camera.nominal_view_size;
+    viewport.projection_matrix = glm::perspective(
+        (float)M_PI/4, viewport.aspect_ratio, 0.01f, 100.0f
     ) * glm::mat4(coord_system_fix());
 
     {
         // Convert mouse pos to screen coords, ie: -1 -> 1
         glm::vec4 screen_coords(0.0f, 0.0f, 0.0f, 1.0f);
         screen_coords.x = 2 * (
-            window_state.mouse_pos_screen.x
-                - (float)window_state.screen_width / 2
-            ) / window_state.screen_width;
+            input.mouse_pos_screen.x
+                - (float)viewport.screen_width / 2
+            ) / viewport.screen_width;
         screen_coords.y = - 2 * (
-            window_state.mouse_pos_screen.y
-                - (float)window_state.screen_height / 2
-            ) / window_state.screen_height;
+            input.mouse_pos_screen.y
+                - (float)viewport.screen_height / 2
+            ) / viewport.screen_height;
 
         // Project onto world
         glm::mat4 view_inverse =
-            game_state.camera.pose.to_mat4()
-            * glm::scale(glm::vec3(1.0f / scale, 1.0f / (scale * window_state.aspect_ratio), 1));
-        window_state.mouse_pos_world = view_inverse * screen_coords;
+            camera.pose.to_mat4()
+            * glm::scale(glm::vec3(1.0f / scale, 1.0f / (scale * viewport.aspect_ratio), 1));
+        input.mouse_pos_world = view_inverse * screen_coords;
     }
 
-    if (window_state.mouse_active && game_state.mouse_mode.raw_mouse_motion) {
+    if (input.mouse_active && camera.cursor_mode.raw_mouse_motion) {
         glm::vec2 centre = {
-            (float)window_state.screen_width / 2,
-            (float)window_state.screen_height / 2
+            (float)viewport.screen_width / 2,
+            (float)viewport.screen_height / 2
         };
         glfwSetCursorPos(window, centre.x, centre.y);
-        window_state.mouse_delta = window_state.mouse_pos_screen - centre;
-        window_state.mouse_pos_screen = centre;
+        input.mouse_delta = input.mouse_pos_screen - centre;
+        input.mouse_pos_screen = centre;
     } else {
-        window_state.mouse_delta = { 0, 0 };
+        input.mouse_delta = { 0, 0 };
     }
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

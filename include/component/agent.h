@@ -15,6 +15,10 @@ struct Agent {
         float size;
         float density;
         glm::vec4 color;
+        struct {
+            int head;
+            int body;
+        } meshes;
         float twist_gain_lin;
         float twist_gain_ang;
     };
@@ -34,16 +38,13 @@ class AgentList: public ComponentList<Agent> {
 public:
     AgentList(
         MeshList& meshes,
-        RigidBodyList& rigid_bodies,
-        MeshRenderer& mesh_renderer
+        RigidBodyList& rigid_bodies
     ):
         meshes(meshes),
-        rigid_bodies(rigid_bodies),
-        mesh_renderer(mesh_renderer)
+        rigid_bodies(rigid_bodies)
     {}
     MeshList& meshes;
     RigidBodyList& rigid_bodies;
-    MeshRenderer& mesh_renderer;
 };
 
 int create_agent(
