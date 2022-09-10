@@ -98,10 +98,37 @@ CityBuilder::CityBuilder(Builder& builder, int node):
 
 void CityBuilder::create_children()
 {
-    auto road = builder.create_region<RoadBuilder>(node);
-    roads.push_back(road);
-    road->lower = centre - size/2.f;
-    road->upper = centre + size/2.f;
+    roads.push_back(builder.create_region<RoadBuilder>(node));
+    roads.back()->lower = centre + glm::vec2(
+        -size.x/2 + outer_padding,
+        -size.y/2 + outer_padding);
+    roads.back()->upper = centre + glm::vec2(
+        size.x/2 - outer_padding,
+        -size.y/2 + outer_padding + road_width);
+
+    roads.push_back(builder.create_region<RoadBuilder>(node));
+    roads.back()->lower = centre + glm::vec2(
+        -size.x/2 + outer_padding,
+        size.y/2 - outer_padding - road_width);
+    roads.back()->upper = centre + glm::vec2(
+        size.x/2 - outer_padding,
+        size.y/2 - outer_padding);
+
+    roads.push_back(builder.create_region<RoadBuilder>(node));
+    roads.back()->lower = centre + glm::vec2(
+        -size.x/2 + outer_padding,
+        -size.y/2 + outer_padding + road_width);
+    roads.back()->upper = centre + glm::vec2(
+        -size.x/2 + outer_padding + road_width,
+        size.y/2 - outer_padding - road_width);
+
+    roads.push_back(builder.create_region<RoadBuilder>(node));
+    roads.back()->lower = centre + glm::vec2(
+        size.x/2 - outer_padding - road_width,
+        -size.y/2 + outer_padding + road_width);
+    roads.back()->upper = centre + glm::vec2(
+        size.x/2 - outer_padding,
+        size.y/2 - outer_padding - road_width);
 }
 
 void CityBuilder::generate_mesh(

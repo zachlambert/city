@@ -134,7 +134,7 @@ void TerrainRenderer::tick()
             GL_TRIANGLES,
             region_data.index_count,
             GL_UNSIGNED_SHORT,
-            (void*)region_data.index_offset
+            (void*)(region_data.index_offset * sizeof(unsigned short))
         );
     }
 }
