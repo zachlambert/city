@@ -98,7 +98,10 @@ CityBuilder::CityBuilder(Builder& builder, int node):
 
 void CityBuilder::create_children()
 {
-
+    auto road = builder.create_region<RoadBuilder>(node);
+    roads.push_back(road);
+    road->lower = centre - size/2.f;
+    road->upper = centre + size/2.f;
 }
 
 void CityBuilder::generate_mesh(
@@ -121,11 +124,17 @@ void RoadBuilder::generate_mesh(
     std::vector<MeshVertex>& vertices,
     std::vector<unsigned short>& indices)
 {
-    generate_plane(vertices, indices,
+    vertices.clear(); indices.clear();
+
+    append_plane(vertices, indices,
         color,
         glm::vec3(0, 0, 1),
         glm::vec3(1, 0, 0),
         upper.x - lower.x,
         upper.y - lower.y);
-    translate_vertices(vertices, 0.5f * (lower + upper));
+    glm::vec3 pos;
+    pos.x = 0.5f * (lower.x + upper.x);
+    pos.y = 0.5f * (lower.y + upper.y);
+    pos.z = 0;
+    translate_vertices(vertices, pos);
 }

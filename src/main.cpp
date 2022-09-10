@@ -69,9 +69,20 @@ int main()
     }());
 
     {
-        Builder builder(world, terrain_renderer);
-        builder.start();
-        builder.finish();
+        Builder builder;
+
+        auto city = builder.create_root<CityBuilder>();
+        city->centre = glm::vec3(0, 0, 0);
+        city->size = glm::vec2(128, 128);
+        city->road_width = 8;
+        city->outer_padding = 16;
+        city->create_children();
+
+        for (auto& road: city->roads) {
+            road->color = glm::vec4(0.5, 0.5, 0.5, 1);
+        }
+
+        builder.finish(world, terrain_renderer);
     }
 
     while (viewport.open) {

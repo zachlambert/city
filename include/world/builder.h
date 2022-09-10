@@ -17,9 +17,9 @@ struct BuildNode {
     {}
 };
 
+class Builder;
 class RegionBuilder {
 public:
-    class Builder;
     RegionBuilder(Builder& builder, int node):
         builder(builder),
         node(node)
@@ -60,7 +60,7 @@ public:
     {
         nodes.at(node).children.push_back(next_node);
         auto region_builder = std::make_shared<T>(*this, next_node);
-        nodes.at(next_node).region_builder = region_builder;
+        nodes[next_node].region_builder = region_builder;
         next_node++;
         return region_builder;
     }

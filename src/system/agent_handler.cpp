@@ -20,10 +20,11 @@ AgentHandler::AgentHandler(
         std::vector<unsigned short> indices;
         glm::vec4 color = glm::vec4(0, 0.5, 1, 1);
 
-        generate_box(vertices, indices, color, glm::vec3(0.4, 0.2, 0.5));
+        append_box(vertices, indices, color, glm::vec3(0.4, 0.2, 0.5));
         mesh_renderer.load_mesh("agent_head", vertices, indices);
 
-        generate_capsule(vertices, indices, color, 0.3, 1, 0.05);
+        vertices.clear(); indices.clear();
+        append_capsule(vertices, indices, color, 0.3, 1, 0.05);
         mesh_renderer.load_mesh("agent_body", vertices, indices);
     }
 

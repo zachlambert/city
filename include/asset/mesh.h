@@ -10,13 +10,13 @@ struct MeshVertex {
     glm::vec4 color;
 };
 
-void generate_box(
+void append_box(
     std::vector<MeshVertex>& vertices,
     std::vector<unsigned short>& indices,
     const glm::vec4& color,
     const glm::vec3& size);
 
-void generate_cylinder(
+void append_cylinder(
     std::vector<MeshVertex>& vertices,
     std::vector<unsigned short>& indices,
     const glm::vec4& color,
@@ -24,14 +24,14 @@ void generate_cylinder(
     float length,
     float resolution);
 
-void generate_sphere(
+void append_sphere(
     std::vector<MeshVertex>& vertices,
     std::vector<unsigned short>& indices,
     const glm::vec4& color,
     float radius,
     float resolution);
 
-void generate_capsule(
+void append_capsule(
     std::vector<MeshVertex>& vertices,
     std::vector<unsigned short>& indices,
     const glm::vec4& color,
@@ -39,7 +39,7 @@ void generate_capsule(
     float length,
     float resolution);
 
-void generate_plane(
+void append_plane(
     std::vector<MeshVertex>& vertices,
     std::vector<unsigned short>& indices,
     const glm::vec4& color,
@@ -47,3 +47,5 @@ void generate_plane(
     const glm::vec3& dir_depth,
     float depth,
     float width);
+
+void translate_vertices(std::vector<MeshVertex>& vertices, const glm::vec3& pos);

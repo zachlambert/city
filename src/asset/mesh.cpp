@@ -2,15 +2,12 @@
 #include "asset/mesh.h"
 
 
-void generate_box(
+void append_box(
     std::vector<MeshVertex>& vertices,
     std::vector<unsigned short>& indices,
     const glm::vec4& color,
     const glm::vec3& size)
 {
-    vertices.clear();
-    indices.clear();
-
     MeshVertex vertex;
     vertex.color = color;
     for (size_t i = 0; i < 6; i++) {
@@ -49,7 +46,7 @@ void generate_box(
     }
 }
 
-void generate_cylinder(
+void append_cylinder(
     std::vector<MeshVertex>& vertices,
     std::vector<unsigned short>& indices,
     const glm::vec4& color,
@@ -57,9 +54,6 @@ void generate_cylinder(
     float length,
     float resolution)
 {
-    vertices.clear();
-    indices.clear();
-
     MeshVertex vertex;
     vertex.color = color;
 
@@ -120,7 +114,7 @@ void generate_cylinder(
     }
 }
 
-void generate_sphere(
+void append_sphere(
     std::vector<MeshVertex>& vertices,
     std::vector<unsigned short>& indices,
     const glm::vec4& color,
@@ -128,9 +122,6 @@ void generate_sphere(
     float resolution)
 {
     // TODO: Replace with mesh of a icosahedron instead
-
-    vertices.clear();
-    indices.clear();
 
     const size_t N = ceil(radius*M_PI / resolution);
     float phi, theta;
@@ -204,7 +195,7 @@ void generate_sphere(
     }
 }
 
-void generate_capsule(
+void append_capsule(
     std::vector<MeshVertex>& vertices,
     std::vector<unsigned short>& indices,
     const glm::vec4& color,
@@ -212,9 +203,6 @@ void generate_capsule(
     float length,
     float resolution)
 {
-    vertices.clear();
-    indices.clear();
-
     size_t N = ceil(radius*M_PI / resolution);
     N += (N % 2); // Must be even
     float phi, theta;
@@ -295,7 +283,7 @@ void generate_capsule(
     }
 }
 
-void generate_plane(
+void append_plane(
     std::vector<MeshVertex>& vertices,
     std::vector<unsigned short>& indices,
     const glm::vec4& color,
@@ -304,9 +292,6 @@ void generate_plane(
     float depth,
     float width)
 {
-    vertices.clear();
-    indices.clear();
-
     MeshVertex vertex;
     vertex.color = color;
     vertex.normal = normal;
@@ -327,4 +312,11 @@ void generate_plane(
     indices.push_back(1);
     indices.push_back(3);
     indices.push_back(2);
+}
+
+void translate_vertices(std::vector<MeshVertex>& vertices, const glm::vec3& pos)
+{
+    for (auto& vertex: vertices) {
+        vertex.pos += pos;
+    }
 }
