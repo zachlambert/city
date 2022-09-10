@@ -294,3 +294,37 @@ void generate_capsule(
         }
     }
 }
+
+void generate_plane(
+    std::vector<MeshVertex>& vertices,
+    std::vector<unsigned short>& indices,
+    const glm::vec4& color,
+    const glm::vec3& normal,
+    const glm::vec3& dir_depth,
+    float depth,
+    float width)
+{
+    vertices.clear();
+    indices.clear();
+
+    MeshVertex vertex;
+    vertex.color = color;
+    vertex.normal = normal;
+
+    glm::vec3 u1 = dir_depth;
+    glm::vec3 u2 = glm::cross(normal, dir_depth);
+
+    for (size_t i = 0; i < 4; i++) {
+        vertex.pos =
+            (i % 2 == 0 ? -1 : 1) * 0.5f * depth * u1
+            + (i < 2 ? -1 : 1) * 0.5f * width * u2;
+        vertices.push_back(vertex);
+    }
+
+    indices.push_back(0);
+    indices.push_back(1);
+    indices.push_back(2);
+    indices.push_back(1);
+    indices.push_back(3);
+    indices.push_back(2);
+}

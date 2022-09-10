@@ -193,7 +193,7 @@ void MeshRenderer::tick()
     glBindVertexArray(VAO);
     glUniformMatrix4fv(pv_loc, 1, GL_FALSE, &pv_matrix[0][0]);
 
-    for (auto& data: datas) {
+    for (const auto& data: datas) {
         size_t instance_offset = data.instance_next - data.instance_count;
         glDrawElementsInstancedBaseInstance(
             GL_TRIANGLES,

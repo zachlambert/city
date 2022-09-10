@@ -3,8 +3,10 @@
 #include "system/camera_handler.h"
 #include "system/clock_handler.h"
 #include "system/mesh_renderer.h"
+#include "system/terrain_renderer.h"
 #include "system/physics.h"
 #include "system/window_handler.h"
+#include "world/builder.h"
 #include <yaml-cpp/yaml.h>
 
 
@@ -16,6 +18,7 @@ int main()
     Clock clock;
     Input input;
     Viewport viewport;
+    World world;
 
     MeshList meshes;
     RigidBodyList rigid_bodies;
@@ -44,6 +47,12 @@ int main()
         return args;
     }());
 
+    TerrainRenderer terrain_renderer(viewport, world, [&config]() {
+        TerrainRenderer::Args args;
+        args.shader_path = config["shader_path"].as<std::string>();
+        return args;
+    }());
+
     ClockHandler clock_handler(clock);
 
     CameraHandler camera_handler(camera, input, clock, [&config]() {
@@ -59,6 +68,11 @@ int main()
         return AgentHandler::Args();
     }());
 
+    {
+        Builder builder(world, terrain_renderer);
+        builder.build();
+    }
+
     while (viewport.open) {
         window_handler.tick();
         clock_handler.tick();
@@ -66,6 +80,7 @@ int main()
         agent_handler.tick();
         physics.tick();
         mesh_renderer.tick();
+        terrain_renderer.tick();
     }
     return 0;
 }

@@ -22,7 +22,9 @@ add_executable(game
     src/system/clock_handler.cpp
     src/system/mesh_renderer.cpp
     src/system/physics.cpp
+    src/system/terrain_renderer.cpp
     src/system/window_handler.cpp
+    src/world/builder.cpp
     src/main.cpp
 )
 

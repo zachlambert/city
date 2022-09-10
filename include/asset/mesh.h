@@ -38,3 +38,12 @@ void generate_capsule(
     float radius,
     float length,
     float resolution);
+
+void generate_plane(
+    std::vector<MeshVertex>& vertices,
+    std::vector<unsigned short>& indices,
+    const glm::vec4& color,
+    const glm::vec3& normal,
+    const glm::vec3& dir_depth,
+    float depth,
+    float width);

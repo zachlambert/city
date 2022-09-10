@@ -30,6 +30,7 @@ AgentHandler::AgentHandler(
     Agent::Args default_agent;
     {
         default_agent.initial_pose = Pose::identity();
+        default_agent.initial_pose.pos.z += 0.8;
 
         default_agent.size = 0.5;
         default_agent.density = 1000;
