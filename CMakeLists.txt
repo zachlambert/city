@@ -24,7 +24,7 @@ add_executable(game
     src/system/physics.cpp
     src/system/terrain_renderer.cpp
     src/system/window_handler.cpp
-    src/world/builder.cpp
+    # src/world/builder.cpp
     src/main.cpp
 )
 

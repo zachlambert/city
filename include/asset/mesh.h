@@ -46,6 +46,16 @@ void append_plane(
     const glm::vec3& normal,
     const glm::vec3& dir_depth,
     float depth,
-    float width);
+    float width,
+    const glm::vec3& offset = glm::vec3(0, 0, 0));
+
+void append_circle(
+    std::vector<MeshVertex>& vertices,
+    std::vector<unsigned short>& indices,
+    const glm::vec4& color,
+    const glm::vec3& normal,
+    float radius,
+    float resolution,
+    const glm::vec3& offset = glm::vec3(0, 0, 0));
 
 void translate_vertices(std::vector<MeshVertex>& vertices, const glm::vec3& pos);

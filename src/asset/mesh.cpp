@@ -290,8 +290,11 @@ void append_plane(
     const glm::vec3& normal,
     const glm::vec3& dir_depth,
     float depth,
-    float width)
+    float width,
+    const glm::vec3& offset)
 {
+    size_t index_offset = vertices.size();
+
     MeshVertex vertex;
     vertex.color = color;
     vertex.normal = normal;
@@ -300,18 +303,68 @@ void append_plane(
     glm::vec3 u2 = glm::cross(normal, dir_depth);
 
     for (size_t i = 0; i < 4; i++) {
-        vertex.pos =
+        vertex.pos = offset + 
             (i % 2 == 0 ? -1 : 1) * 0.5f * depth * u1
             + (i < 2 ? -1 : 1) * 0.5f * width * u2;
         vertices.push_back(vertex);
     }
 
-    indices.push_back(0);
-    indices.push_back(1);
-    indices.push_back(2);
-    indices.push_back(1);
-    indices.push_back(3);
-    indices.push_back(2);
+    indices.push_back(index_offset);
+    indices.push_back(index_offset + 1);
+    indices.push_back(index_offset + 2);
+    indices.push_back(index_offset + 1);
+    indices.push_back(index_offset + 3);
+    indices.push_back(index_offset + 2);
+}
+
+void append_circle(
+    std::vector<MeshVertex>& vertices,
+    std::vector<unsigned short>& indices,
+    const glm::vec4& color,
+    const glm::vec3& normal,
+    float radius,
+    float resolution,
+    const glm::vec3& offset)
+{
+    glm::vec3 u1_candidate[3];
+    float max_norm = -1;
+    size_t max_norm_i = 0;
+    float u1_norms[3];
+    for (size_t i = 0; i < 3; i++) {
+        for (size_t j = 0; j < 3; j++) {
+            u1_candidate[i][j] = i==j ? 1 : 0;
+        }
+        float norm = glm::length(glm::cross(normal, u1_candidate[i]));
+        if (norm > max_norm) {
+            max_norm_i = i;
+            max_norm = norm;
+        }
+    }
+    glm::vec3 u1 = glm::normalize(glm::cross(normal, u1_candidate[max_norm_i]));
+    glm::vec3 u2 = glm::cross(normal, u1);
+
+    MeshVertex vertex;
+    vertex.color = color;
+    vertex.normal = normal;
+
+    vertex.pos = offset;
+    vertices.push_back(vertex);
+
+    size_t N = ceil(2 * M_PI * radius / resolution);
+    for (size_t i = 0; i < N; i++) {
+        float theta = 2 * M_PI * (float)i / N;
+        vertex.pos = offset + u1 * std::cos(theta) + u2 * std::sin(theta);
+        vertices.push_back(vertex);
+        if (i != N - 1) {
+            indices.push_back(0);
+            indices.push_back(1 + i);
+            indices.push_back(1 + i + 1);
+        } else {
+            indices.push_back(0);
+            indices.push_back(1 + i);
+            indices.push_back(1);
+        }
+    }
 }
 
 void translate_vertices(std::vector<MeshVertex>& vertices, const glm::vec3& pos)

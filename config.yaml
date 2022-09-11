@@ -3,3 +3,12 @@ window:
   name: "City"
   width: 1200
   height: 800
+random_seed: 502
+builder:
+  city:
+    size: [ 100, 100 ]
+    max_height: 100
+    cell_width: 5
+    road_width: 1
+    road_color: [ 0.2, 0.2, 0.2, 1.0 ]
+    num_inner_roads: 100

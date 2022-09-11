@@ -7,12 +7,15 @@
 #include "system/physics.h"
 #include "system/window_handler.h"
 #include "world/builder.h"
+#include "world/city.h"
 #include <yaml-cpp/yaml.h>
 
 
 int main()
 {
     auto config = YAML::LoadFile("config.yaml");
+
+    srand(config["random_seed"].as<int>());
 
     Camera camera;
     Clock clock;
@@ -69,20 +72,9 @@ int main()
     }());
 
     {
-        Builder builder;
-
-        auto city = builder.create_root<CityBuilder>();
-        city->centre = glm::vec3(0, 0, 0);
-        city->size = glm::vec2(128, 128);
-        city->road_width = 8;
-        city->outer_padding = 16;
-        city->create_children();
-
-        for (auto& road: city->roads) {
-            road->color = glm::vec4(0.5, 0.5, 0.5, 1);
-        }
-
-        builder.finish(world, terrain_renderer);
+        Builder builder(config["builder"]);
+        builder.create<CityBuilder>();
+        builder.generate(world, terrain_renderer);
     }
 
     while (viewport.open) {
