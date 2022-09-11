@@ -14,10 +14,16 @@ struct CityBounds {
 class CityBuilder: public AreaBuilder {
 private:
     struct Cell {
-        bool road;
+        enum class Type {
+            FREE,
+            INACCESSIBLE,
+            ROAD,
+            AREA
+        };
+        Type type;
         std::array<bool, 4> conns;
         Cell():
-            road(false)
+            type(Type::FREE)
         {
             std::fill(conns.begin(), conns.end(), false);
         }
@@ -79,13 +85,16 @@ public:
         GridIndex index;
         cells.resize(GridIndex(args.size / args.cell_width));
 
+        generate_edge();
         generate_outer_road();
+#if 0
         int num_inner_roads = 0;
         int iter = 0;
         while (num_inner_roads < args.num_inner_roads && iter < args.num_inner_roads * 5) {
             num_inner_roads += generate_inner_road();
             iter++;
         }
+#endif
 
         write_world(world, terrain_renderer);
 
@@ -93,8 +102,54 @@ public:
     }
 
 private:
+    void generate_edge()
+    {
+        int max_padding = 3;//args.size.x * 0.05;
+        int min_padding = 1;//args.size.x * 0.05;
+
+        const int initial_padding = min_padding + rand() % (max_padding - min_padding);
+        const GridIndex initial_dir(1, 0);
+
+        int padding = initial_padding;
+        GridIndex dir = initial_dir;
+
+        float change_chance = 0.5;
+
+        GridIndex pos(padding, padding);
+        GridIndex perp = dir.rotate(1);
+        bool lock_to_initial = false;
+        do {
+            while (cells.valid(pos + padding * dir)) {
+                if (cells.valid(pos - perp)) {
+                    cells[pos - perp].type = Cell::Type::INACCESSIBLE;
+                }
+                pos += dir;
+                int new_padding = padding;
+                if (!lock_to_initial && dir.rotate(1) == initial_dir
+                    && !cells.valid(pos + dir * (initial_padding + 2)))
+                {
+                    lock_to_initial = true;
+                    padding = initial_padding;
+                }
+                if (!lock_to_initial && rand_float() < change_chance) {
+                    new_padding = min_padding + rand() % (max_padding - min_padding);
+                }
+                for (int i = padding; i != new_padding; i += (new_padding > padding ? 1 : -1)) {
+                    if (cells.valid(pos - perp)) {
+                        cells[pos - perp].type = Cell::Type::INACCESSIBLE;
+                    }
+                    pos += perp;
+                }
+            }
+            pos -= dir;
+            dir = dir.rotate(1);
+            perp = perp.rotate(1);
+        } while (dir != GridIndex(1, 0));
+
+    }
     void generate_outer_road()
     {
+#if 0
         GridIndex pos(0, 0);
         GridIndex dir(1, 0);
         do {
@@ -111,11 +166,13 @@ private:
             pos -= dir;
             dir = dir.rotate(1);
         } while (dir != GridIndex(1, 0));
+#endif
     }
 
     int generate_inner_road()
     {
         int num_roads = 0;
+#if 0
 
         GridIndex dir(1, 0);
         {
@@ -186,6 +243,7 @@ private:
             }
             pos += dir;
         }
+#endif
         return num_roads;
     }
 
@@ -196,18 +254,28 @@ private:
         GridIndex pos;
         for (pos.x = 0; pos.x < cells.shape().x; pos.x++) {
             for (pos.y = 0; pos.y < cells.shape().y; pos.y++) {
-                if (!cells[pos].road) continue;
 
                 glm::vec2 centre_xy = args.centre + args.cell_width * (
                     (glm::vec2)pos - glm::vec2(cells.shape())/2.f - glm::vec2(0.5, 0.5));
-
                 Region region;
                 region.centre = glm::vec3(centre_xy.x, centre_xy.y, 0);
                 region.visible = true;
                 int index = world.regions.size();
                 world.regions.push_back(region);
 
-                generate_road_mesh(vertices, indices, region.centre, cells[pos]);
+                if (cells[pos].type == Cell::Type::INACCESSIBLE) {
+                    vertices.clear(); indices.clear();
+                    append_plane(vertices, indices,
+                            glm::vec4(1, 0, 0, 1),
+                            glm::vec3(0, 0, 1),
+                            glm::vec3(1, 0, 0),
+                            args.cell_width,
+                            args.cell_width,
+                            region.centre);
+
+                } else if (cells[pos].type == Cell::Type::ROAD) {
+                    generate_road_mesh(vertices, indices, region.centre, cells[pos]);
+                }
 
                 terrain_renderer.set_region(index);
                 terrain_renderer.load_mesh(vertices, indices);

@@ -60,6 +60,22 @@ inline bool operator==(const GridIndex& lhs, const GridIndex& rhs)
 {
     return lhs.x == rhs.x && lhs.y == rhs.y;
 }
+inline GridIndex& operator*=(GridIndex& lhs, int rhs)
+{
+    lhs.x *= rhs;
+    lhs.y *= rhs;
+    return lhs;
+}
+inline GridIndex operator*(GridIndex lhs, int rhs)
+{
+    lhs *= rhs;
+    return lhs;
+}
+inline GridIndex operator*(int lhs, GridIndex rhs)
+{
+    rhs *= lhs;
+    return rhs;
+}
 
 template <typename T>
 class Grid {
