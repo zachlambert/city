@@ -7,7 +7,6 @@
 #include "system/physics.h"
 #include "system/window_handler.h"
 #include "world/builder.h"
-#include "world/city.h"
 #include <yaml-cpp/yaml.h>
 
 
@@ -72,9 +71,8 @@ int main()
     }());
 
     {
-        Builder builder(config["builder"]);
-        builder.create<CityBuilder>();
-        builder.generate(world, terrain_renderer);
+        Builder builder;
+        builder.build(world, terrain_renderer);
     }
 
     while (viewport.open) {

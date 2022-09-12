@@ -1,5 +1,6 @@
 
 #include "asset/mesh.h"
+#include <stdio.h>
 
 
 void append_box(
@@ -353,7 +354,7 @@ void append_circle(
     size_t N = ceil(2 * M_PI * radius / resolution);
     for (size_t i = 0; i < N; i++) {
         float theta = 2 * M_PI * (float)i / N;
-        vertex.pos = offset + u1 * std::cos(theta) + u2 * std::sin(theta);
+        vertex.pos = offset + radius * u1 * std::cos(theta) + radius * u2 * std::sin(theta);
         vertices.push_back(vertex);
         if (i != N - 1) {
             indices.push_back(0);

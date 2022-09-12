@@ -3,7 +3,7 @@ window:
   name: "City"
   width: 1200
   height: 800
-random_seed: 503
+random_seed: 508
 builder:
   city:
     size: [ 100, 100 ]
