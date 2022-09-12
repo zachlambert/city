@@ -47,7 +47,7 @@ void CameraHandler::tick()
                 mode.pos += camera.pose.orient * glm::vec3(1, 0, 0) * dist_to_floor;
             }
 
-            mode.pos.z = 5;
+            mode.pos.z = 20;
             mode.yaw = prior->euler.z;
             camera.mode = mode;
         }
@@ -56,12 +56,12 @@ void CameraHandler::tick()
     if (auto mode = std::get_if<CameraModeFirstPerson>(&camera.mode)) {
 
         glm::vec3 vel = glm::zero<glm::vec3>();
-        if (input.key_states.at(GLFW_KEY_D).down) vel.y -= 5;
-        if (input.key_states.at(GLFW_KEY_A).down) vel.y += 5;
-        if (input.key_states.at(GLFW_KEY_S).down) vel.x -= 5;
-        if (input.key_states.at(GLFW_KEY_W).down) vel.x += 5;
-        if (input.key_states.at(GLFW_KEY_LEFT_SHIFT).down) vel.z -= 5;
-        if (input.key_states.at(GLFW_KEY_SPACE).down) vel.z += 5;
+        if (input.key_states.at(GLFW_KEY_D).down) vel.y -= 20;
+        if (input.key_states.at(GLFW_KEY_A).down) vel.y += 20;
+        if (input.key_states.at(GLFW_KEY_S).down) vel.x -= 20;
+        if (input.key_states.at(GLFW_KEY_W).down) vel.x += 20;
+        if (input.key_states.at(GLFW_KEY_LEFT_SHIFT).down) vel.z -= 20;
+        if (input.key_states.at(GLFW_KEY_SPACE).down) vel.z += 20;
         mode->pos += camera.pose.orient * vel * clock.dt;
 
         glm::vec3 euler_dot = glm::zero<glm::vec3>();
@@ -104,12 +104,12 @@ void CameraHandler::tick()
     } else if (auto mode = std::get_if<CameraModeTopDown>(&camera.mode)) {
 
         glm::vec3 vel = glm::zero<glm::vec3>();
-        if (input.key_states.at(GLFW_KEY_D).down) vel.y -= 5;
-        if (input.key_states.at(GLFW_KEY_A).down) vel.y += 5;
-        if (input.key_states.at(GLFW_KEY_S).down) vel.z -= 5;
-        if (input.key_states.at(GLFW_KEY_W).down) vel.z += 5;
-        if (input.key_states.at(GLFW_KEY_LEFT_SHIFT).down) vel.x += 5;
-        if (input.key_states.at(GLFW_KEY_SPACE).down) vel.x -= 5;
+        if (input.key_states.at(GLFW_KEY_D).down) vel.y -= 20;
+        if (input.key_states.at(GLFW_KEY_A).down) vel.y += 20;
+        if (input.key_states.at(GLFW_KEY_S).down) vel.z -= 20;
+        if (input.key_states.at(GLFW_KEY_W).down) vel.z += 20;
+        if (input.key_states.at(GLFW_KEY_LEFT_SHIFT).down) vel.x += 20;
+        if (input.key_states.at(GLFW_KEY_SPACE).down) vel.x -= 20;
         mode->pos += camera.pose.orient * vel * clock.dt;
 
         float yaw_dot = 0;

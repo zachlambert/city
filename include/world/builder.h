@@ -58,7 +58,6 @@ struct AngleInterval {
         bool max_inside = contains(cut.max());
         bool inside = cut.range < range && min_inside && max_inside;
         if (inside) {
-            printf("inside\n");
             AngleInterval extra;
             extra.min = cut.max();
             extra.range = positive_angle(max() - cut.max());
@@ -67,18 +66,15 @@ struct AngleInterval {
         }
         bool fully_remove = cut.range > range && !min_inside && !max_inside;
         if (fully_remove) {
-            printf("fully remove\n");
             return { 0, {} };
         }
 
         if (max_inside) {
             range = positive_angle(min + range - cut.max());
             min = cut.max();
-            printf("max inside -> %f, %f\n", min, range);
         }
         if (min_inside) {
             range = positive_angle(cut.min - min);
-            printf("min inside -> %f, %f\n", min, range);
         }
         return { 1, {} };
     }
@@ -89,15 +85,34 @@ struct AngleInterval {
 };
 
 struct AngleSet {
+    void print()
+    {
+        for (size_t i = 0; i < intervals.size(); i++) {
+            if (intervals[i].full) {
+                printf("[%zu] %f, %f (full)\n", i, intervals[i].min, intervals[i].range);
+            } else {
+                printf("[%zu] %f, %f\n", i, intervals[i].min, intervals[i].range);
+            }
+        }
+    }
     float get(float t, float padding = 0) // Proportion
     {
-        float angle = padding + t * (total_range - padding * 2);
+        float total_angle = 0;
+        for (const auto& interval: intervals) {
+            if (interval.range > padding) {
+                total_angle += (interval.range - padding);
+            }
+        }
+        float angle = t * total_angle;
         float current = 0;
         for (const auto& interval: intervals) {
-            if (angle - current < interval.range) {
-                return clamp_angle(interval.min + (angle - current));
+            float increase = interval.range - padding;
+            if (increase > 0) {
+                if (angle < current + increase) {
+                    return interval.min + padding/2 + (angle - current);
+                }
+                current += increase;
             }
-            current += interval.range;
         }
         assert(false);
         return 0;
@@ -111,10 +126,7 @@ struct AngleSet {
     }
     void remove(AngleInterval cut)
     {
-        printf("Cut: %f, %f\n", cut.min, cut.range);
-        for (const auto& interval: intervals) {
-            printf("Interval: %f, %f\n", interval.min, interval.range);
-        }
+        printf("Remove: %f, %f\n", cut.min, cut.range);
         size_t size = intervals.size();
         for (size_t i = 0; i < size; i++) {
             AngleInterval& interval = intervals[i];
@@ -127,11 +139,6 @@ struct AngleSet {
             }
             intervals.push_back(extra_interval);
         }
-        compute_total_range();
-        printf("After:\n");
-        for (const auto& interval: intervals) {
-            printf("Interval: %f, %f\n", interval.min, interval.range);
-        }
     }
     void cull(float min_range)
     {
@@ -143,27 +150,17 @@ struct AngleSet {
             }
             i++;
         }
-        compute_total_range();
     }
     bool empty()const
     {
         return intervals.empty();
     }
-    AngleSet(float min, float range):
-        total_range(range)
+    AngleSet()
     {
-        intervals.emplace_back(min, range);
+        intervals.emplace_back();
     }
 private:
-    void compute_total_range()
-    {
-        total_range = 0;
-        for (const auto& interval: intervals) {
-            total_range += interval.range;
-        }
-    }
     std::vector<AngleInterval> intervals;
-    float total_range;
 };
 
 struct Node {
@@ -174,7 +171,7 @@ struct Node {
     int region;
     Node(const glm::vec3& pos, int iteration):
         pos(pos),
-        angle_set(0, 2 * M_PI),
+        angle_set(),
         iteration(iteration),
         region(-1)
     {}
@@ -191,15 +188,21 @@ public:
         float min_length = 30;
         float max_length = 100;
         float road_width = 5;
-        int max_iteration = 12;
+        int max_iteration = 20;
         glm::vec4 road_color = glm::vec4(0.4, 0.4, 0.4, 1);
 
         nodes.emplace_back(glm::vec3(0, 0, 0), 0);
+        printf("Initial interval\n");
+        nodes[0].angle_set.print();
         growable.push(0);
         while (!growable.empty()) {
             int node_i = growable.top();
             auto& node = nodes[node_i];
             printf("Extending from %i\n", node_i);
+            node.angle_set.print();
+            printf("Edges: ");
+            for (int conn: node.edges) printf("%i, ", conn);
+            printf("\n");
 
             if (node.angle_set.empty()) {
                 printf("Finished %i\n", node_i);
@@ -223,6 +226,8 @@ public:
                 node.angle_set.remove(interval);
                 node.angle_set.cull(angle_spacing);
 
+                continue; // TEMP
+
                 // If the next node can't make this connection, continue
                 if (next.angle_set.intersects(opp_interval)) {
                     continue;
@@ -244,14 +249,18 @@ public:
                 node.angle_set.remove(interval);
                 node.angle_set.cull(angle_spacing);
 
+                continue; // TEMP
+
                 Node& snap_a = nodes[snap.node];
                 Node& snap_b = nodes[snap_a.edges[snap.edge]];
 
                 float road_angle = std::atan2(snap_b.pos.y - snap_a.pos.y, snap_b.pos.x - snap_a.pos.x);
                 float angle_dif = std::fabs(std::fabs(clamp_angle(road_angle - angle)) - M_PI/2);
-                if (angle_dif > 0) {
+                if (angle_dif > M_PI/4) {
+                    printf("Failed\n");
                     continue;
                 }
+                node.edges.push_back(next_i);
 
                 for (auto& edge: snap_b.edges) {
                     if (edge == snap.node) {
@@ -268,6 +277,7 @@ public:
                 next.angle_set.cull(angle_spacing);
                 next.edges.push_back(snap.node);
                 next.edges.push_back(snap_a.edges[snap.edge]);
+                next.edges.push_back(node_i);
 
                 snap_a.edges[snap.edge] = next_i;
                 if (next.iteration < max_iteration) {
@@ -347,11 +357,12 @@ public:
             terrain_renderer.set_region(node.region);
 
             append_circle(vertices, indices,
-                road_color,
+                // road_color,
+                glm::vec4(1, 0, 0, 1),
                 glm::vec3(0, 0, 1),
                 road_width / 2,
                 road_width * 0.05,
-                node.pos);
+                node.pos + glm::vec3(0, 0, 0.5));
 
             for (int edge: node.edges) {
                 const Node& other = nodes[edge];
@@ -363,7 +374,7 @@ public:
                     glm::vec3(0, 0, 1),
                     u1,
                     glm::length(disp),
-                    road_width * 0.8, // TEMP: For visualisation
+                    road_width,
                     node.pos + disp / 2.f);
             }
             terrain_renderer.load_mesh(vertices, indices);
@@ -441,7 +452,6 @@ private:
                     min_snap.node = i;
                     min_snap.on_edge = true;
                     min_snap.edge = j;
-                    printf("Setting edge = %i, size = %zu, node = %i\n", min_snap.edge, nodes[i].edges.size(), i);
                     min_snap.edge_pos = edge_pos;
                     colliding = true;
                     min_dist = glm::length(min_snap.edge_pos - from);
@@ -462,7 +472,6 @@ private:
                     min_snap.node = i;
                     min_snap.on_edge = true;
                     min_snap.edge = j;
-                    printf("Setting edge = %i, size = %zu, node = %i\n", min_snap.edge, nodes[i].edges.size(), i);
                     min_snap.edge_pos = a + u1 * x1_to;
                     min_dist = edge_dist;
                 }
