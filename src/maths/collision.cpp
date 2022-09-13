@@ -2,6 +2,8 @@
 #include "maths/collision.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
+#include <glm/gtx/string_cast.hpp>
+#include <iostream>
 
 
 CapsuleCollision capsule_collision(const Capsule& a, const Capsule& b)
@@ -12,13 +14,13 @@ CapsuleCollision capsule_collision(const Capsule& a, const Capsule& b)
     const glm::vec3 va = glm::cross(norm, ua);
     const glm::vec3 vb = glm::cross(norm, ub);
 
-    const glm::mat3 Ra = glm::transpose(glm::mat3(ua, va, norm));
+    const glm::mat3 Ra = glm::mat3(ua, va, norm);
     const glm::mat3 Rb = glm::mat3(ub, vb, norm);
     auto project_on_a = [&](const glm::vec3& x) {
         return glm::transpose(Ra) * (x - a.start);
     };
     auto project_on_b = [&](const glm::vec3& x) {
-        return glm::transpose(Ra) * (x - a.start);
+        return glm::transpose(Rb) * (x - b.start);
     };
 
     const float a_length = glm::length(a.end - a.start);
@@ -37,9 +39,9 @@ CapsuleCollision capsule_collision(const Capsule& a, const Capsule& b)
     if (a_crosses && b_crosses) {
         // Intersection
         float a_location = std::fabs(a0_b.y) / (std::fabs(a0_b.y) + std::fabs(a1_b.y));
-        result.closest_a = a.start + a_location * a_length;
+        result.closest_a = a.start + a_location * a_length * ua;
         float b_location = std::fabs(b0_a.y) / (std::fabs(b0_a.y) + std::fabs(b1_a.y));
-        result.closest_b = b.start + b_location * b_length;
+        result.closest_b = b.start + b_location * b_length * ub;
 
     } else if (a_crosses) {
         // b lies completely to one side, whichever endpoint is closer
@@ -79,9 +81,7 @@ CapsuleCollision capsule_collision(const Capsule& a, const Capsule& b)
     }
 
     result.distance = glm::length(result.closest_b - result.closest_a) - (a.radius + b.radius);
-    if (result.distance < 0) {
-        result.collision = true;
-    }
+    result.collision = result.distance < 0;
 
     return result;
 }

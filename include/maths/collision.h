@@ -7,6 +7,14 @@ struct Capsule {
     glm::vec3 start;
     glm::vec3 end;
     float radius;
+    Capsule():
+        start(0, 0, 0),
+        end(0, 0, 0),
+        radius(0)
+    {}
+    Capsule(const glm::vec3& start, const glm::vec3& end, float radius=0):
+        start(start), end(end), radius(radius)
+    {}
 };
 struct CapsuleCollision {
     bool collision;

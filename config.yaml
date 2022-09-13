@@ -5,10 +5,9 @@ window:
   height: 800
 random_seed: 508
 builder:
-  city:
-    size: [ 100, 100 ]
-    max_height: 100
-    cell_width: 5
-    road_width: 1
-    road_color: [ 0.2, 0.2, 0.2, 1.0 ]
-    num_inner_roads: 100
+  angle_spacing: 1.57
+  min_length: 4
+  max_length: 10
+  road_width: 1
+  max_iteration: 100
+  road_color: [ 0.4, 0.4, 0.4, 1.0 ]

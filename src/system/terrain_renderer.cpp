@@ -11,7 +11,11 @@ TerrainRenderer::TerrainRenderer(
     const Args& args
 ):
     viewport(viewport),
-    world(world)
+    world(world),
+    vbo_size(0),
+    vbo_capacity(default_vbo_capacity),
+    ebo_size(0),
+    ebo_capacity(default_ebo_capacity)
 {
     program_id = load_shader(
         args.shader_path + "terrain.vs",
@@ -33,8 +37,8 @@ TerrainRenderer::TerrainRenderer(
     {
         glBufferData(
             GL_ARRAY_BUFFER,
-            vertices.size() * sizeof(MeshVertex),
-            &vertices[0],
+            vbo_capacity * sizeof(MeshVertex),
+            nullptr,
             GL_STATIC_DRAW
         );
 
@@ -63,8 +67,8 @@ TerrainRenderer::TerrainRenderer(
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertex_EBO);
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
-        indices.size() * sizeof(unsigned short),
-        &indices[0],
+        ebo_capacity * sizeof(unsigned short),
+        nullptr,
         GL_STATIC_DRAW
     );
 
@@ -99,25 +103,74 @@ void TerrainRenderer::load_mesh(
     }
 }
 
+void TerrainRenderer::clear()
+{
+    vbo_size = 0;
+    vertices.clear();
+    ebo_size = 0;
+    indices.clear();
+    region_datas.clear();
+}
+
 void TerrainRenderer::update_buffers()
 {
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, vertex_VBO);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        vertices.size() * sizeof(MeshVertex),
-        &vertices[0],
-        GL_STATIC_DRAW
-    );
+    if (vertices.size() > vbo_capacity) {
+        while (vertices.size() > vbo_capacity) {
+            vbo_capacity *= 2;
+        }
+        vbo_size = vertices.size();
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            vbo_capacity * sizeof(MeshVertex),
+            nullptr,
+            GL_STATIC_DRAW
+        );
+        glBufferSubData(
+            GL_ARRAY_BUFFER,
+            0,
+            vbo_size * sizeof(MeshVertex),
+            &vertices[0]
+        );
+    } else if (vertices.size() > vbo_size) {
+        glBufferSubData(
+            GL_ARRAY_BUFFER,
+            vbo_size * sizeof(MeshVertex),
+            (vertices.size() - vbo_size) * sizeof(MeshVertex),
+            &vertices[vbo_size]
+        );
+        vbo_size = vertices.size();
+    }
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertex_EBO);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
-        indices.size() * sizeof(unsigned short),
-        &indices[0],
-        GL_STATIC_DRAW
-    );
+    if (indices.size() > ebo_capacity) {
+        while (indices.size() > ebo_capacity) {
+            ebo_capacity *= 2;
+        }
+        ebo_size = indices.size();
+        glBufferData(
+            GL_ELEMENT_ARRAY_BUFFER,
+            ebo_capacity * sizeof(unsigned short),
+            nullptr,
+            GL_STATIC_DRAW
+        );
+        glBufferSubData(
+            GL_ELEMENT_ARRAY_BUFFER,
+            0,
+            ebo_size * sizeof(unsigned short),
+            &indices[0]
+        );
+    } else if (indices.size() > ebo_size) {
+        glBufferSubData(
+            GL_ELEMENT_ARRAY_BUFFER,
+            ebo_size * sizeof(unsigned short),
+            (indices.size() - ebo_size) * sizeof(unsigned short),
+            &indices[ebo_size]
+        );
+        ebo_size = indices.size();
+    }
 }
 
 void TerrainRenderer::tick()
@@ -128,6 +181,7 @@ void TerrainRenderer::tick()
     glBindVertexArray(VAO);
     glUniformMatrix4fv(pv_loc, 1, GL_FALSE, &pv_matrix[0][0]);
 
+#if 0
     for (const auto& iter: region_datas) {
         const RegionData& region_data = iter.second;
         glDrawElements(
@@ -137,4 +191,12 @@ void TerrainRenderer::tick()
             (void*)(region_data.index_offset * sizeof(unsigned short))
         );
     }
+#else
+    glDrawElements(
+        GL_TRIANGLES,
+        ebo_size,
+        GL_UNSIGNED_SHORT,
+        0
+    );
+#endif
 }

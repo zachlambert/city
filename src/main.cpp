@@ -1,5 +1,6 @@
 
 #include "system/agent_handler.h"
+#include "system/build_manager.h"
 #include "system/camera_handler.h"
 #include "system/clock_handler.h"
 #include "system/mesh_renderer.h"
@@ -38,7 +39,7 @@ int main()
             GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_S, GLFW_KEY_W,
             GLFW_KEY_LEFT_SHIFT, GLFW_KEY_SPACE,
             GLFW_KEY_Q, GLFW_KEY_E,
-            GLFW_KEY_1, GLFW_KEY_2
+            GLFW_KEY_1, GLFW_KEY_2, GLFW_KEY_3, GLFW_KEY_4
         };
         return args;
     }());
@@ -70,10 +71,7 @@ int main()
         return AgentHandler::Args();
     }());
 
-    {
-        Builder builder;
-        builder.build(world, terrain_renderer);
-    }
+    BuildManager build_manager(input, world, terrain_renderer, config);
 
     while (viewport.open) {
         window_handler.tick();
@@ -81,6 +79,7 @@ int main()
         camera_handler.tick();
         agent_handler.tick();
         physics.tick();
+        build_manager.tick();
         mesh_renderer.tick();
         terrain_renderer.tick();
     }

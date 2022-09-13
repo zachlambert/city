@@ -327,6 +327,8 @@ void append_circle(
     float resolution,
     const glm::vec3& offset)
 {
+    size_t index_offset = vertices.size();
+
     glm::vec3 u1_candidate[3];
     float max_norm = -1;
     size_t max_norm_i = 0;
@@ -357,13 +359,13 @@ void append_circle(
         vertex.pos = offset + radius * u1 * std::cos(theta) + radius * u2 * std::sin(theta);
         vertices.push_back(vertex);
         if (i != N - 1) {
-            indices.push_back(0);
-            indices.push_back(1 + i);
-            indices.push_back(1 + i + 1);
+            indices.push_back(index_offset);
+            indices.push_back(index_offset + 1 + i);
+            indices.push_back(index_offset + 1 + i + 1);
         } else {
-            indices.push_back(0);
-            indices.push_back(1 + i);
-            indices.push_back(1);
+            indices.push_back(index_offset);
+            indices.push_back(index_offset + 1 + i);
+            indices.push_back(index_offset + 1);
         }
     }
 }

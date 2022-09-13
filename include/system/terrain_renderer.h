@@ -27,6 +27,7 @@ public:
     void load_mesh(
         const std::vector<MeshVertex>& mesh_vertices,
         const std::vector<unsigned short>& mesh_indices);
+    void clear();
 
     void update_buffers();
 
@@ -42,7 +43,13 @@ private:
     int selected_region;
     std::unordered_map<int, RegionData> region_datas;
 
+    static constexpr size_t default_vbo_capacity = 128;
+    size_t vbo_size;
+    size_t vbo_capacity;
     std::vector<MeshVertex> vertices;
+    static constexpr size_t default_ebo_capacity = 128;
+    size_t ebo_size;
+    size_t ebo_capacity;
     std::vector<unsigned short> indices;
 
     const Viewport& viewport;

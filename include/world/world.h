@@ -33,4 +33,9 @@ struct World {
     std::vector<Region> regions;
     std::vector<Connection> connections;
     std::vector<ConnectionData> connection_datas;
+    void clear() {
+        regions.clear();
+        connections.clear();
+        connection_datas.clear();
+    }
 };

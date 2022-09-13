@@ -1,10 +1,12 @@
 
 #include "maths/angles.h"
+#include <assert.h>
+
 
 AngleInterval::AngleInterval():
     min(0),
-    range(2 * M_PI),
-    full(true)
+    range(0),
+    full(false)
 {}
 
 AngleInterval::AngleInterval(float centre, float range):
@@ -30,8 +32,7 @@ float clamp_angle_positive(float angle)
 bool AngleInterval::contains(float angle)const
 {
     if (full) return true;
-    float dist = clamp_angle(angle) - clamp_angle(min);
-    return clamp_angle_positive(dist) < range;
+    return clamp_angle_positive(clamp_angle(angle) - clamp_angle(min)) < range;
 }
 
 bool AngleInterval::intersects(const AngleInterval& other)const
@@ -53,15 +54,17 @@ std::tuple<int, AngleInterval> AngleInterval::remove(const AngleInterval& cut)
 
     bool min_inside = contains(cut.min);
     bool max_inside = contains(cut.max());
-    bool inside = cut.range < range && min_inside && max_inside;
+    bool inside = min_inside && max_inside &&
+        (clamp_angle_positive(cut.min - min) < clamp_angle_positive(cut.max() - min));
     if (inside) {
         AngleInterval extra;
+        extra.full = false;
         extra.min = cut.max();
         extra.range = clamp_angle_positive(max() - cut.max());
         range = clamp_angle_positive(cut.min - min);
         return { 2, extra };
     }
-    bool fully_remove = cut.range > range && !min_inside && !max_inside;
+    bool fully_remove = !min_inside && !max_inside;
     if (fully_remove) {
         return { 0, {} };
     }
@@ -84,10 +87,13 @@ float AngleInterval::max()const
 AngleSet::AngleSet()
 {
     intervals.emplace_back();
+    intervals.back().full = true;
 }
 
-float AngleSet::get(float t, float padding)
+float AngleSet::get(float t, float padding)const
 {
+    if (intervals.size() == 1 && intervals[0].full) return t * 2 * M_PI;
+
     float total_angle = 0;
     for (const auto& interval: intervals) {
         if (interval.range > padding) {
@@ -100,15 +106,24 @@ float AngleSet::get(float t, float padding)
         float increase = interval.range - padding;
         if (increase > 0) {
             if (angle < current + increase) {
-                return interval.min + padding/2 + (angle - current);
+                return clamp_angle(interval.min + padding/2 + (angle - current));
             }
             current += increase;
         }
     }
+    assert(false);
     return 0;
 }
 
-bool AngleSet::intersects(const AngleInterval& query)
+bool AngleSet::contains(float angle)const
+{
+    for (const auto& interval: intervals) {
+        if (interval.contains(angle)) return true;
+    }
+    return false;
+}
+
+bool AngleSet::intersects(const AngleInterval& query)const
 {
     for (const auto& interval: intervals) {
         if (query.intersects(interval)) return true;
@@ -128,6 +143,7 @@ void AngleSet::remove(AngleInterval cut)
             size--;
             continue;
         }
+        // else, num == 2
         intervals.push_back(extra_interval);
     }
 }
