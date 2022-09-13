@@ -8,12 +8,9 @@
 #include "world/world.h"
 #include "system/terrain_renderer.h"
 #include "maths/geometry.h"
+#include "maths/angles.h"
+#include "maths/random.h"
 
-
-inline float rand_float()
-{
-    return (float)rand() / (float)RAND_MAX;
-}
 
 struct Node {
     glm::vec3 pos;
@@ -44,14 +41,12 @@ public:
         glm::vec4 road_color = glm::vec4(0.4, 0.4, 0.4, 1);
 
         nodes.emplace_back(glm::vec3(0, 0, 0), 0);
-        printf("Initial interval\n");
-        nodes[0].angle_set.print();
         growable.push(0);
         while (!growable.empty()) {
             int node_i = growable.top();
             auto& node = nodes[node_i];
-            printf("Extending from %i\n", node_i);
-            node.angle_set.print();
+            std::cout << "Extending from " << node_i << "\n";
+            std::cout << node.angle_set << "\n";
             printf("Edges: ");
             for (int conn: node.edges) printf("%i, ", conn);
             printf("\n");

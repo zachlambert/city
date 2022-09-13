@@ -4,6 +4,9 @@
 #define DEFINE_MATH_CONSTANTS
 #include <cmath>
 #include <tuple>
+#include <iostream>
+#include <concepts>
+
 
 float clamp_angle(float angle);
 float clamp_angle_positive(float angle);
@@ -21,6 +24,7 @@ private:
     float range;
     bool full;
     friend class AngleSet;
+    friend std::ostream& operator<<(std::ostream& os, const AngleInterval& angle_interval);
 };
 
 class AngleSet {
@@ -33,5 +37,8 @@ public:
     bool empty()const;
 private:
     std::vector<AngleInterval> intervals;
+    friend std::ostream& operator<<(std::ostream& os, const AngleSet& angle_set);
 };
 
+std::ostream& operator<<(std::ostream& os, const AngleSet& angle_set);
+std::ostream& operator<<(std::ostream& os, const AngleInterval& angle_interval);

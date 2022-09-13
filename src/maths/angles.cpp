@@ -1,6 +1,17 @@
 
 #include "maths/angles.h"
 
+AngleInterval::AngleInterval():
+    min(0),
+    range(2 * M_PI),
+    full(true)
+{}
+
+AngleInterval::AngleInterval(float centre, float range):
+    min(clamp_angle(centre - range/2)),
+    range(range),
+    full(false)
+{}
 
 float clamp_angle(float angle)
 {
@@ -136,4 +147,20 @@ void AngleSet::cull(float min_range)
 bool AngleSet::empty()const
 {
     return intervals.empty();
+}
+
+std::ostream& operator<<(std::ostream& os, const AngleSet& angle_set)
+{
+    os << "[";
+    for (const auto& interval: angle_set.intervals) {
+        os << interval << ", ";
+    }
+    os << " ]";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const AngleInterval& angle_interval)
+{
+    os << "(" << angle_interval.min << ", " << angle_interval.range << ")";
+    return os;
 }
