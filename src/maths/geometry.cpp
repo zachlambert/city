@@ -113,14 +113,6 @@ Pose matrix_exp(const Spatial& twist)
     return pose;
 }
 
-float clamp_angle(float angle)
-{
-    if (angle < 0) angle += 2 * M_PI;
-    angle = std::fmod(angle, 2 * M_PI);
-    if (angle > M_PI) angle -= 2 * M_PI;
-    return angle;
-}
-
 glm::mat3 euler_to_rotation(const glm::vec3& euler)
 {
     glm::mat3 result;

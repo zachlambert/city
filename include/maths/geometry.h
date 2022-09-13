@@ -50,8 +50,6 @@ Spatial adjoint_map_momentum(const Spatial& twist, const Spatial& momentum);
 
 Pose matrix_exp(const Spatial& twist);
 
-float clamp_angle(float angle);
-
 // Transforms from X = Forward, Y = Left, Z = Up
 // to opengl frame, -Z = Forward, -X = Left, Y = Up
 // Need to use when calculating projection matrix, and to work with some

@@ -18,6 +18,7 @@ add_executable(game
     src/component/mesh.cpp
     src/component/rigid_body.cpp
     src/maths/collision.cpp
+    src/maths/geometry.cpp
     src/system/agent_handler.cpp
     src/system/camera_handler.cpp
     src/system/clock_handler.cpp
