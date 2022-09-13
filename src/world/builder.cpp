@@ -5,6 +5,7 @@
 
 Builder::Builder(YAML::Node config)
 {
+    angle_std = config["angle_std"].as<float>();
     angle_spacing = config["angle_spacing"].as<float>();
     min_length = config["min_length"].as<float>();
     max_length = config["max_length"].as<float>();
@@ -14,6 +15,7 @@ Builder::Builder(YAML::Node config)
     for (size_t i = 0; i < road_color_arr.size(); i++) {
         road_color[i] = road_color_arr[i].as<float>();
     }
+    min_distance = config["min_distance"].as<float>();
     snap_distance = config["snap_distance"].as<float>();
     node_snap_distance = config["node_snap_distance"].as<float>();
     edge_snap_angle = config["edge_snap_angle"].as<float>();
@@ -40,7 +42,16 @@ bool Builder::add_road()
             continue;
         }
 
-        float angle = node.angle_set.get(rand_float(), angle_spacing/2);
+#if 0
+        float angle = node.angle_set.get(rand_float(), angle_spacing);
+#else
+        float angle;
+        {
+            size_t i = rand() % node.angle_set.intervals.size();
+            const AngleInterval& interval = node.angle_set.intervals[i];
+            angle = clamp_angle(interval.min + std::clamp(sample_gaussian(interval.range/2, angle_std), 0.f, interval.range));
+        }
+#endif
         AngleInterval interval(angle, angle_spacing);
         AngleInterval opp_interval(clamp_angle(angle + M_PI), angle_spacing);
 
@@ -78,7 +89,7 @@ bool Builder::add_road()
                 Edge snap_edge;
                 snap_edge.node_1 = from_i;
                 snap_edge.node_2 = to_i;
-                snap_edge.capsule = Capsule(from.pos, to.pos, angle_spacing / 2);
+                snap_edge.capsule = Capsule(from.pos, to.pos, road_width / 2);
                 edges.push_back(snap_edge);
 
                 return true;
@@ -114,7 +125,7 @@ bool Builder::add_road()
             Edge snap_edge;
             snap_edge.node_1 = node_i;
             snap_edge.node_2 = next_i;
-            snap_edge.capsule = Capsule(node.pos, edge_query.snap_pos);
+            snap_edge.capsule = Capsule(node.pos, edge_query.snap_pos, road_width / 2);
 
             // Split the collided edge into two edges
             // [node_1] -> collided -> [node_2]
@@ -165,11 +176,20 @@ bool Builder::add_road()
             edges.push_back(snap_edge);
             edges.push_back(other_edge);
             nodes.push_back(next);
+
+            if (next.iteration < max_iteration) {
+                growable.push_back(next_i);
+            }
+
             return true;
         }
 
         node.angle_set.remove(interval);
         node.angle_set.cull(angle_spacing);
+
+        if (edge_query.distance < min_distance) {
+            continue;
+        }
 
         int next_i = nodes.size();
 
@@ -296,7 +316,7 @@ Builder::EdgeQuery Builder::query_edge(int node_from, const glm::vec3& to)
                 query.snap_pos = result.closest_b;
             }
 
-        } else if (!query.collision && result.distance < result.distance) {
+        } else if (!query.collision && result.distance < query.distance) {
             query.edge_i = edge_i;
             query.collision = false;
             query.distance = result.distance;

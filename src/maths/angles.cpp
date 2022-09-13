@@ -58,7 +58,6 @@ std::tuple<int, AngleInterval> AngleInterval::remove(const AngleInterval& cut)
         (clamp_angle_positive(cut.min - min) < clamp_angle_positive(cut.max() - min));
     if (inside) {
         AngleInterval extra;
-        extra.full = false;
         extra.min = cut.max();
         extra.range = clamp_angle_positive(max() - cut.max());
         range = clamp_angle_positive(cut.min - min);
@@ -70,7 +69,7 @@ std::tuple<int, AngleInterval> AngleInterval::remove(const AngleInterval& cut)
     }
 
     if (max_inside) {
-        range = clamp_angle_positive(min + range - cut.max());
+        range = clamp_angle_positive(max() - cut.max());
         min = cut.max();
     }
     if (min_inside) {
@@ -134,17 +133,19 @@ bool AngleSet::intersects(const AngleInterval& query)const
 void AngleSet::remove(AngleInterval cut)
 {
     size_t size = intervals.size();
-    for (size_t i = 0; i < size; i++) {
+    size_t i = 0;
+    while (i < size) {
         AngleInterval& interval = intervals[i];
         auto [num, extra_interval] = interval.remove(cut);
-        if (num == 1) continue;
         if (num == 0) {
             intervals.erase(intervals.begin() + i);
             size--;
             continue;
         }
-        // else, num == 2
-        intervals.push_back(extra_interval);
+        if (num == 2) {
+            intervals.push_back(extra_interval);
+        }
+        i++;
     }
 }
 

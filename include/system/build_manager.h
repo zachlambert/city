@@ -25,7 +25,7 @@ public:
     void tick()
     {
         if (input.key_states.at(GLFW_KEY_3).pressed()) {
-            builder.add_road();
+            while (!builder.add_road());
             builder.write_world(world, terrain_renderer);
         }
         if (input.key_states.at(GLFW_KEY_4).pressed()) {

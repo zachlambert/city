@@ -59,6 +59,7 @@ private:
         float radius,
         float resolution);
 
+    float angle_std;
     float angle_spacing;
     float min_length;
     float max_length;
@@ -66,6 +67,7 @@ private:
     int max_iteration;
     glm::vec4 road_color;
 
+    float min_distance;
     float snap_distance = 5; // TODO: Set in config
     float node_snap_distance = 5;
     float edge_snap_angle = 0.5;
