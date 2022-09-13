@@ -5,9 +5,12 @@ window:
   height: 800
 random_seed: 508
 builder:
-  angle_spacing: 1.57
-  min_length: 4
-  max_length: 10
-  road_width: 1
-  max_iteration: 100
+  angle_spacing: 2.00
+  min_length: 2
+  max_length: 5
+  road_width: 0.4
+  snap_distance: 2 
+  node_snap_distance: 1
+  edge_snap_angle: 0.7
+  max_iteration: 1000
   road_color: [ 0.4, 0.4, 0.4, 1.0 ]

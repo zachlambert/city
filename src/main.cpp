@@ -39,7 +39,8 @@ int main()
             GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_S, GLFW_KEY_W,
             GLFW_KEY_LEFT_SHIFT, GLFW_KEY_SPACE,
             GLFW_KEY_Q, GLFW_KEY_E,
-            GLFW_KEY_1, GLFW_KEY_2, GLFW_KEY_3, GLFW_KEY_4
+            GLFW_KEY_1, GLFW_KEY_2,
+            GLFW_KEY_3, GLFW_KEY_4, GLFW_KEY_5
         };
         return args;
     }());
