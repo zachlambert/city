@@ -42,16 +42,13 @@ bool Builder::add_road()
             continue;
         }
 
-#if 0
-        float angle = node.angle_set.get(rand_float(), angle_spacing);
-#else
         float angle;
         {
             size_t i = rand() % node.angle_set.intervals.size();
             const AngleInterval& interval = node.angle_set.intervals[i];
             angle = clamp_angle(interval.min + std::clamp(sample_gaussian(interval.range/2, angle_std), 0.f, interval.range));
         }
-#endif
+
         AngleInterval interval(angle, angle_spacing);
         AngleInterval opp_interval(clamp_angle(angle + M_PI), angle_spacing);
 
@@ -65,14 +62,27 @@ bool Builder::add_road()
             Node& node_1 = nodes[collided_edge.node_1];
             Node& node_2 = nodes[collided_edge.node_2];
 
-            auto snap_node = [this](Node& from, Node& to, int from_i, int to_i) {
+            auto snap_node = [this, interval](Node& from, Node& to, int from_i, int to_i) {
                 const glm::vec3 disp = to.pos - from.pos;
                 float snap_angle = atan2(disp.y, disp.x);
 
                 AngleInterval snap_interval(snap_angle, angle_spacing);
                 AngleInterval opp_snap_interval(clamp_angle(snap_angle + M_PI), angle_spacing);
 
-                if (to.angle_set.intersects(opp_snap_interval)) {
+                AngleInterval from_inverse;
+                from_inverse.full = true;
+                for (const auto& interval: from.angle_set.intervals) {
+                    from_inverse.remove(interval);
+                }
+                AngleInterval to_inverse;
+                to_inverse.full = true;
+                for (const auto& interval: to.angle_set.intervals) {
+                    from_inverse.remove(interval);
+                }
+
+                if (from_inverse.intersects(snap_interval) || to_inverse.intersects(opp_snap_interval)) {
+                    from.angle_set.remove(interval);
+                    from.angle_set.cull(angle_spacing);
                     return false;
                 }
 
@@ -82,7 +92,7 @@ bool Builder::add_road()
                 from.angle_set.cull(angle_spacing);
                 from.edges.push_back(snap_edge_i);
 
-                to.angle_set.remove(snap_interval);
+                to.angle_set.remove(opp_snap_interval);
                 to.angle_set.cull(angle_spacing);
                 to.edges.push_back(snap_edge_i);
 
@@ -95,10 +105,18 @@ bool Builder::add_road()
                 return true;
             };
             if (glm::length(edge_query.snap_pos - node_1.pos) < node_snap_distance) {
-                return snap_node(node, node_1, node_i, collided_edge.node_1);
+                if (snap_node(node, node_1, node_i, collided_edge.node_1)) {
+                    return true;
+                } else {
+                    continue;
+                }
             }
             if (glm::length(edge_query.snap_pos - node_2.pos) < node_snap_distance) {
-                return snap_node(node, node_2, node_i, collided_edge.node_2);
+                if (snap_node(node, node_2, node_i, collided_edge.node_2)) {
+                    return true;
+                } else {
+                    continue;
+                }
             }
 
             // Determine snap angle and road angle, to make sure these aren't
@@ -111,7 +129,7 @@ bool Builder::add_road()
             float road_angle = atan2(road_disp.y, road_disp.x);
 
             if (std::fabs(std::fabs(clamp_angle(road_angle - snap_angle)) - M_PI/2) > edge_snap_angle) {
-                return false;
+                continue;
             }
 
             // Create the new node
@@ -263,15 +281,18 @@ void Builder::write_world(World& world, TerrainRenderer& terrain_renderer)
             road_width / 2,
             road_width * 0.05,
             node.pos);
-
+        
+#if 0
         append_angle_set_mesh(
             vertices,
             indices,
             node.angle_set,
-            node.pos + glm::vec3(0, 0, 0.2),
+            node.pos + glm::vec3(0, 0, z),
             glm::vec4(0, 0, 1, 1),
             road_width/2,
-            road_width * 0.05);
+            road_width * 0.01);
+#endif
+
 
         for (int edge_i: node.edges) {
             const Edge& edge = edges[edge_i];
@@ -284,10 +305,11 @@ void Builder::write_world(World& world, TerrainRenderer& terrain_renderer)
                 road_color,
                 glm::vec3(0, 0, 1),
                 u1,
-                glm::length(disp),
+                glm::length(disp) / 2,
                 road_width,
-                node.pos + disp / 2.f);
+                node.pos + disp / 4.f);
         }
+
         terrain_renderer.load_mesh(vertices, indices);
     }
 

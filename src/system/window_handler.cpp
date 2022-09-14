@@ -143,7 +143,7 @@ void WindowHandler::tick()
     viewport.view_matrix = camera.pose.inverse().to_mat4();
     const float scale = camera.zoom / camera.nominal_view_size;
     viewport.projection_matrix = glm::perspective(
-        (float)M_PI/4, viewport.aspect_ratio, 0.01f, 1000.0f
+        (float)M_PI/4, viewport.aspect_ratio, 1.f, 10000.0f
     ) * glm::mat4(coord_system_fix());
 
     {

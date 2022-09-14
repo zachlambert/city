@@ -49,11 +49,11 @@ CapsuleCollision capsule_collision(const Capsule& a, const Capsule& b)
         if (std::fabs(b0_a.y) < std::fabs(b1_a.y)) {
             // b.start is closer, at a distance (b0_a.x) along ua
             result.closest_b = b.start;
-            result.closest_a = a.start + b0_a.x * ua;
+            result.closest_a = a.start + std::clamp(b0_a.x, 0.f, a_length) * ua;
         } else {
             // b.end is closer, at a distance (b1_a.x) along ua
             result.closest_b = b.end;
-            result.closest_a = a.start + b1_a.x * ua;
+            result.closest_a = a.start + std::clamp(b1_a.x, 0.f, b_length)  * ua;
         }
     } else if (b_crosses) {
         // a lies completely to one side, whichever endpoint is closer
@@ -61,11 +61,11 @@ CapsuleCollision capsule_collision(const Capsule& a, const Capsule& b)
         if (std::fabs(a0_b.y) < std::fabs(a1_b.y)) {
             // a.start is closer, at a distance (a0_b.x) along ub
             result.closest_a = a.start;
-            result.closest_b = b.start + a0_b.x * ub;
+            result.closest_b = b.start + std::clamp(a0_b.x, 0.f, b_length) * ub;
         } else {
             // a.end is closer, at a distance (a1_b.x) along ub
             result.closest_a = a.end;
-            result.closest_b = b.start + a1_b.x * ub;
+            result.closest_b = b.start + std::clamp(a1_b.x, 0.f, b_length) * ub;
         }
     } else {
         if (std::fabs(b0_a.y) < std::fabs(b1_a.y)) {
